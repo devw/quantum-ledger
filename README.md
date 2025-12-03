@@ -1,100 +1,107 @@
 # 🚀 Post-Quantum Hyperledger Fabric Benchmark
 
-A research-oriented framework for evaluating the **performance impact of post-quantum cryptography (PQC)** on **Hyperledger Fabric**.
-This repository supports experiments with **ECDSA**, **PQC-only**, and **Hybrid (ECDSA + PQC)** signing schemes to assess quantum-resilient transaction flows.
+Research framework for evaluating **Post-Quantum Cryptography (PQC)** performance impact on **Hyperledger Fabric**.
 
 ---
 
-## 🎯 Purpose of This Project
+## 🎯 Overview
 
-This project provides a reproducible environment to:
+Reproducible environment for benchmarking quantum-resilient cryptographic schemes:
 
-* benchmark PQC algorithms (Dilithium, Falcon, etc.) integrated into Fabric
-* measure performance impact on transaction latency, throughput, endorsement, and ordering
-* test hybrid cryptographic models for quantum-secure enterprise blockchains
-* support the experiments described in the associated research paper
+| Mode | Description | Use Case |
+|:-----|:------------|:---------|
+| 🔵 **ECDSA** | Baseline (P-256) | Performance reference |
+| 🟣 **PQC-only** | Dilithium/Falcon | Pure quantum-resistant |
+| 🟢 **Hybrid** | ECDSA + PQC | Transition strategy |
 
----
-
-## 📦 Features
-
-* Docker-based reproducible Hyperledger Fabric network
-* Pluggable cryptographic modules (ECDSA, PQC, Hybrid)
-* Benchmarking through Hyperledger Caliper
-* Scripts for automated data collection
-* Preliminary PQC verification chaincode examples
-* Experimental mode for testing PQC-only signatures
+**→** Full methodology: [docs/BENCHMARK_PROTOCOL.md](docs/BENCHMARK_PROTOCOL.md)
 
 ---
 
-## 🧪 Experimental Architecture
+## 📊 Key Metrics
 
-### 🔐 Cryptographic Modes
+- **Throughput** (TPS), **Latency** (mean, P95)
+- **Signature timings** (generation/verification)
+- **Resource usage** (CPU/RAM), **Block size**
 
-* **ECDSA (baseline)**
-* **Post-quantum signatures** (Dilithium / Falcon via liboqs or custom modules)
-* **Hybrid signatures**: ECDSA + PQC verification inside chaincode
-
-### 📊 Metrics Collected
-
-* Transaction throughput (TPS)
-* Transaction latency
-* Peer and orderer CPU/RAM usage
-* Signature generation and verification times
-* Block size and commit time impact
+**→** Complete specifications: [docs/METRICS_SPECIFICATION.md](docs/METRICS_SPECIFICATION.md)
 
 ---
 
 ## 🏗️ Repository Structure
 
 ```
-/docs/              – Paper notes, architecture diagrams, design docs  
-/network/           – Docker-based Fabric network configuration  
-/crypto/            – PQC libraries, hybrid signing utilities  
-/chaincode/         – Sample chaincodes including PQC verification  
-/caliper/           – Benchmarking configurations and workload files  
-/scripts/           – Automation scripts for experiments and data collection  
-/results/           – Experimental results and plots  
+├── docs/           → 📚 Complete documentation (see docs/README.md)
+├── network/        → 🐳 Fabric Docker configuration
+├── crypto/         → 🔐 PQC libraries & hybrid signing
+├── chaincode/      → 📝 Smart contracts with PQC verification
+├── caliper/        → 📈 Benchmark workloads & configs
+├── scripts/        → ⚙️ Automation & data collection
+└── results/        → 📊 Experimental data & analysis
 ```
 
 ---
 
-## 🐳 Deployment (Quick Start)
+## 🚀 Quick Start
 
-1. Install Docker + Docker Compose
-2. Launch the Fabric network
-3. Deploy chaincode with PQC or hybrid verification
-4. Run benchmarks with Caliper
-5. Collect and analyze performance data
+```bash
+# 1. Deploy network
+cd network && ./deploy.sh
 
-(Detailed instructions coming soon.)
+# 2. Install chaincode
+./scripts/install-chaincode.sh
+
+# 3. Run benchmark
+cd caliper && npx caliper launch manager
+
+# 4. Analyze results
+python scripts/analyze-results.py
+```
+
+**→** Detailed setup: [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
 
 ---
 
-## 📚 Research Context
+## 📚 Documentation
 
-This repository supports the experiments for a research study on:
+**Complete documentation available in [`docs/`](docs/README.md)**
 
-* the feasibility of quantum-resilient signatures in Fabric
-* the performance trade-offs of hybrid cryptography
-* the scalability of PQC in enterprise blockchain environments
+| Document | Purpose |
+|:---------|:--------|
+| [ARCHITECTURE.md](docs/ARCHITECTURE.md) | System design & PQC integration |
+| [CRYPTOGRAPHIC_MODES.md](docs/CRYPTOGRAPHIC_MODES.md) | Crypto scheme comparison |
+| [DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md) | Step-by-step setup |
+| [BENCHMARK_PROTOCOL.md](docs/BENCHMARK_PROTOCOL.md) | Testing methodology |
+| [METRICS_SPECIFICATION.md](docs/METRICS_SPECIFICATION.md) | Performance metrics |
+| [IMPLEMENTATION_NOTES.md](docs/IMPLEMENTATION_NOTES.md) | Technical details |
+| [RESULTS_ANALYSIS.md](docs/RESULTS_ANALYSIS.md) | Data interpretation |
 
-A link to the paper will be added once published.
+---
+
+## 🧪 Research Context
+
+This framework supports research on:
+- Quantum-resilient signatures in permissioned blockchains
+- Hybrid cryptography performance trade-offs
+- PQC scalability in enterprise environments
+
+*Paper reference will be added upon publication.*
 
 ---
 
 ## 🤝 Contributing
 
-Contributions, suggestions, and extensions are welcome—especially new PQC integrations, chaincodes, or Caliper scenarios.
+Contributions welcome! Areas of interest:
+- New PQC algorithm integrations
+- Additional benchmark scenarios
+- Performance optimization techniques
 
 ---
 
 ## 📜 License
 
-This project is licensed under the **Creative Commons Attribution–NonCommercial 4.0 International (CC BY-NC 4.0)** license.
+**CC BY-NC 4.0** – Free for non-commercial use. Commercial use requires written permission.
 
-You are free to use, modify, and share the code for **non-commercial purposes**.  
-Commercial use requires **explicit written permission from the author**.
+---
 
-
-
+**🔗 Start here:** [docs/README.md](docs/README.md) | **🚀 Deploy:** [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
