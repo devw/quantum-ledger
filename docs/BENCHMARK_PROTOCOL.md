@@ -33,19 +33,16 @@ All runs are performed across the following three modes (detailed in `CRYPTOGRAP
 
 ---
 
-## 🎯 Key Performance Metrics Summary
+## 🎯 Performance Metrics
 
-The benchmark captures performance from both the client's perspective (Caliper) and the network's internal resource utilization and micro-timing.
+This benchmark captures the following categories of metrics:
+- **Client-side performance** (TPS, Latency)
+- **Micro-timing** (Signature operations, Block commit)
+- **System resources** (CPU, RAM)
+- **Ledger impact** (Block size)
 
-| Metric | Type | Measurement Focus | Impact Assessed |
-| :--- | :--- | :--- | :--- |
-| **Transaction Throughput (TPS)** | Client | Transactions committed per second. | Overall network capacity under PQC load. |
-| **Transaction Latency** | Client | Time from submission to commitment. | User experience and network delay. |
-| **Signature Generation Time** | Micro | Time for client/peer to create signature(s). | PQC computation overhead. |
-| **Signature Verification Time** | Micro | Time for peers/orderer to validate signature(s). | PQC verification overhead (critical bottleneck). |
-| **Block Size** | Ledger | Average size of committed blocks. | Impact of larger PQC signatures on network traffic. |
-| **Commit Time** | Micro | Time taken to validate and append a block. | Validation and state update efficiency. |
-| **Peer/Orderer CPU/RAM** | System | Average/Peak resource usage during the run. | Resource demands of cryptographic operations. |
+**→ For detailed metric definitions, units, and collection methodology, 
+see [METRICS_SPECIFICATION.md](METRICS_SPECIFICATION.md)**
 
 ---
 
