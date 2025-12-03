@@ -28,40 +28,6 @@ Reproducible environment for benchmarking quantum-resilient cryptographic scheme
 
 ---
 
-## 🏗️ Repository Structure
-
-```
-├── docs/           → 📚 Complete documentation (see docs/README.md)
-├── network/        → 🐳 Fabric Docker configuration
-├── crypto/         → 🔐 PQC libraries & hybrid signing
-├── chaincode/      → 📝 Smart contracts with PQC verification
-├── caliper/        → 📈 Benchmark workloads & configs
-├── scripts/        → ⚙️ Automation & data collection
-└── results/        → 📊 Experimental data & analysis
-```
-
----
-
-## 🚀 Quick Start
-
-```bash
-# 1. Deploy network
-cd network && ./deploy.sh
-
-# 2. Install chaincode
-./scripts/install-chaincode.sh
-
-# 3. Run benchmark
-cd caliper && npx caliper launch manager
-
-# 4. Analyze results
-python scripts/analyze-results.py
-```
-
-**→** Detailed setup: [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
-
----
-
 ## 📚 Documentation
 
 **Complete documentation available in [`docs/`](docs/README.md)**

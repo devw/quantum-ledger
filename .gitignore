@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+*.egg-info/
+dist/
+build/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build artifacts (entire directory ignored via its own .gitignore)
+artifacts/binaries/*
+artifacts/certificates/*
+!artifacts/.gitignore
+
+# Data files (don't commit large datasets)
+data/raw/*.csv
+data/processed/*.csv
+*.log
+*.gz
+*.zip
+*.tar
+
+# Docker
+*.pid
+*.seed
+*.pid.lock
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Secrets
+*.key
+*.pem
+*.p12
+credentials.json
+.env
