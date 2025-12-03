@@ -4,13 +4,31 @@ This document outlines the architectural modifications and components of the Pos
 
 ---
 
-## 🔌 Cryptographic Modularity
+## 🔌 Cryptographic Modularity: PQC Integration
 
-The framework achieves PQC integration by introducing a high-level **Cryptographic Service Provider (CSP)** abstraction layer. This layer encapsulates the signature generation and verification logic, allowing for the flexible interchange of cryptographic modes without altering the core Fabric consensus protocols.
+This section details the architectural approach adopted for integrating Post-Quantum Cryptography (PQC) into Hyperledger Fabric, isolating the cryptographic implementation to enable reproducible performance comparison.
 
-* **PQC Implementation:** PQC algorithms (e.g., Dilithium, Falcon) are integrated as a specialized CSP implementation, managing the larger key and signature sizes inherent to lattice-based schemes.
-* **Hybrid Mode:** The **Hybrid** scheme utilizes the CSP to generate and manage **dual signatures** (ECDSA + PQC) during the transaction endorsement and commitment stages.
-* **Serialization Overhead:** The architecture specifically accounts for the increased data payload—particularly in the transaction envelopes—caused by larger PQC signatures, which directly impacts networking and block size. 
+### 🛡️ CSP Abstraction Layer
+
+Integration is achieved by leveraging Fabric's **Cryptographic Service Provider (CSP)** interface. The CSP acts as an abstraction layer for signature generation and verification. 
+
+* **Key Principle:** The core Fabric consensus protocols interact with the CSP interface; thus, the **underlying cryptographic algorithm can be swapped** (e.g., from ECDSA to Dilithium) without altering the critical consensus logic (Endorsement, Ordering).
+
+### 🧪 Implementation Modes and Focus
+
+The framework uses specialized CSP back-ends to implement the distinct test scenarios:
+
+| Mode | Underlying Cryptography | Signature Logic | Benchmark Focus |
+| :--- | :--- | :--- | :--- |
+| **PQC-only** | PQC (e.g., Dilithium) | Exclusive use; replaces all classical signatures. | Measures **pure computational cost** of quantum resistance. |
+| **Hybrid** | ECDSA + PQC | Generates and verifies **dual signatures** per transaction. | Measures **transition overhead** and cost of maximum security. |
+
+### 💾 Serialization Overhead (Impact)
+
+The architecture must explicitly address the negative consequences of larger PQC signatures.
+
+* **Mechanism:** Increased PQC signature size significantly inflates the **transaction envelope payload**.
+* **Impact:** This results in **Serialization Overhead**, directly increasing average **Block Size**. This overhead is a critical metric, as it impacts networking propagation time and commitment latency, contributing significantly to overall throughput degradation.
 
 ---
 
