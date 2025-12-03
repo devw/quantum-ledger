@@ -37,6 +37,10 @@ data/processed/*.csv
 *.gz
 *.zip
 *.tar
+# Monte Carlo generated data
+data/fixtures/monte_carlo/*.csv
+data/fixtures/monte_carlo/*.json
+!data/fixtures/monte_carlo/.gitkeep
 
 # Docker
 *.pid
