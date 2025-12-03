@@ -15,6 +15,7 @@ Post-Quantum Hyperledger Fabric Benchmark Framework
 | **[DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)** | 🚀 Setup Instructions | Step-by-step deployment, Docker commands, network bootstrap |
 | **[IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md)** | 💻 Technical Details | Code modifications, instrumentation hooks, PQC library integration |
 | **[RESULTS_ANALYSIS.md](RESULTS_ANALYSIS.md)** | 📈 Data Interpretation | Statistical analysis methods, visualization guidelines, reporting format |
+| **[SCRIPTS_GUIDE.md](SCRIPTS_GUIDE.md)** | 🛠️ Execution Scripts | **How to run all project scripts** |
 
 ---
 
@@ -35,3 +36,4 @@ Post-Quantum Hyperledger Fabric Benchmark Framework
 - **"How does PQC integration work?"** → [ARCHITECTURE.md](ARCHITECTURE.md) + [IMPLEMENTATION_NOTES.md](IMPLEMENTATION_NOTES.md)
 - **"What's the testing procedure?"** → [BENCHMARK_PROTOCOL.md](BENCHMARK_PROTOCOL.md)
 - **"How do I interpret my results?"** → [RESULTS_ANALYSIS.md](RESULTS_ANALYSIS.md)
+- **"How do I run the project scripts?"** → [SCRIPTS_GUIDE.md](SCRIPTS_GUIDE.md)

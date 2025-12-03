@@ -28,7 +28,6 @@ python analysis/scripts/generate_latex_tables.py --csv path/to/data.csv
 
 **Default CSV:** `data/fixtures/monte_carlo/samples.csv`
 
-
 ## Development
 
 Code follows SOLID/DRY principles:
