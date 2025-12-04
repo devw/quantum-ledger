@@ -9,10 +9,10 @@ Version: 0.1.0 (MVP - Draft)
 Strategy: Simple random generation with basic constraints.
          Correlations will be added in refinement phase.
 """
-
 import random
 from typing import Dict, Any
-
+from tools.data_generation.utils.validators import validate_range
+from tools.data_generation.utils.random_utils import set_random_seed
 
 def generate_tx_rate(load_profile: Dict[str, Any], crypto_performance_factor: float = 1.0) -> float:
     """
@@ -287,36 +287,6 @@ def generate_timestamp(start_timestamp: float, sample_index: int, interval: floa
     return start_timestamp + (sample_index * interval)
 
 
-# ==============================================================================
-# UTILITY FUNCTIONS
-# ==============================================================================
-
-def validate_range(value: float, min_val: float, max_val: float, metric_name: str = "value") -> None:
-    """
-    Validate that a value is within expected range.
-    
-    Args:
-        value: Value to validate
-        min_val: Minimum acceptable value
-        max_val: Maximum acceptable value
-        metric_name: Name of metric for error messages
-        
-    Raises:
-        ValueError: If value is outside range
-    """
-    if not (min_val <= value <= max_val):
-        raise ValueError(f"{metric_name} = {value:.2f} is outside range [{min_val}, {max_val}]")
-
-
-def set_random_seed(seed: int = None) -> None:
-    """
-    Set random seed for reproducibility.
-    
-    Args:
-        seed: Random seed (None = truly random)
-    """
-    if seed is not None:
-        random.seed(seed)
 
 
 # ==============================================================================
