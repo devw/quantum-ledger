@@ -1,38 +1,43 @@
 # Scripts Guide
 
-Comprehensive guide for all executable scripts in the project. All commands should be run from the project root directory.
+Guide to all executable scripts in the project. Run all commands from the project root.
 
 ## 📋 Table of Contents
 
+- [Prerequisites](#prerequisites)
 - [Data Generation](#data-generation)
 - [Data Analysis & Visualization](#data-analysis--visualization)
-- [Prerequisites](#prerequisites)
+- [Testing](#testing)
+- [Complete Workflow Example](#complete-workflow-example)
+- [Troubleshooting](#troubleshooting)
+- [Related Documentation](#related-documentation)
+
+---
+
+## Prerequisites
+
+Install project dependencies:
+
+```bash
+python3.13 -m pip install -r requirements.txt         # runtime deps
+python3.13 -m pip install -r requirements-dev.txt     # dev & test deps
+````
 
 ---
 
 ## Data Generation
 
-### Generate Monte Carlo Samples
-
-Generate synthetic Monte Carlo simulation data for testing and analysis.
+Generate synthetic Monte Carlo data:
 
 **Script:** `tools/scripts/generate_mock_data.py`
 
 ```bash
-# Generate 1000 samples (default)
-python tools/scripts/generate_mock_data.py \
-    --iterations 1000 \
-    --output data/fixtures/monte_carlo/samples.csv
+# Default: 1000 samples
+python tools/scripts/generate_mock_data.py --iterations 1000 --output data/fixtures/monte_carlo/samples.csv
 
-# Generate custom number of samples
-python tools/scripts/generate_mock_data.py \
-    --iterations 5000 \
-    --output data/raw/my_samples.csv
+# Custom samples
+python tools/scripts/generate_mock_data.py --iterations 5000 --output data/raw/my_samples.csv
 ```
-
-**Parameters:**
-- `--iterations` - Number of Monte Carlo iterations (default: 1000)
-- `--output` - Output CSV file path (default: `data/fixtures/monte_carlo/samples.csv`)
 
 ---
 
@@ -40,103 +45,71 @@ python tools/scripts/generate_mock_data.py \
 
 ### Generate Plots
 
-Create scatter plot visualizations from Monte Carlo simulation data.
-
 **Script:** `analysis/scripts/generate_plots.py`
 
 ```bash
-# Using default CSV file
+# Default CSV
 python analysis/scripts/generate_plots.py
 
-# Using custom CSV file
-python analysis/scripts/generate_plots.py \
-    --csv data/raw/my_samples.csv
+# Custom CSV
+python analysis/scripts/generate_plots.py --csv data/raw/my_samples.csv
 ```
 
-**Parameters:**
-- `--csv` - Path to CSV file (default: `data/fixtures/monte_carlo/samples.csv`)
-
----
-
 ### Generate LaTeX Tables
-
-Generate summary statistics tables in LaTeX format.
 
 **Script:** `analysis/scripts/generate_latex_tables.py`
 
 ```bash
-# Using default CSV file
-python analysis/scripts/generate_latex_tables.py
-
-# Using custom CSV file
-python analysis/scripts/generate_latex_tables.py \
-    --csv data/raw/my_samples.csv
+python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
 ```
-
-**Parameters:**
-- `--csv` - Path to CSV file (default: `data/fixtures/monte_carlo/samples.csv`)
 
 ---
 
-## Prerequisites
+## Testing
 
-### Python Dependencies
+Run all tests using pytest:
 
 ```bash
-python3.13 -m pip install -r requirements.txt
+# Run all tests with verbose output
+pytest -v
+
+# Run a single test file
+pytest -v tests/unit/tools/data_generation/test_distributions.py
 ```
+
+Tests use **fixtures** for configuration and are automatically compatible with pytest.
 
 ---
 
 ## Complete Workflow Example
 
-End-to-end example from data generation to visualization:
-
 ```bash
-# 1. Generate Monte Carlo samples
-python tools/scripts/generate_mock_data.py \
-    --iterations 2000 \
-    --output data/fixtures/monte_carlo/samples.csv
+# 1. Generate data
+python tools/scripts/generate_mock_data.py --iterations 2000 --output data/fixtures/monte_carlo/samples.csv
 
-# 2. Generate visualization
-python analysis/scripts/generate_plots.py \
-    --csv data/fixtures/monte_carlo/samples.csv
+# 2. Generate plots
+python analysis/scripts/generate_plots.py --csv data/fixtures/monte_carlo/samples.csv
 
-# 3. Generate statistics table
-python analysis/scripts/generate_latex_tables.py \
-    --csv data/fixtures/monte_carlo/samples.csv
+# 3. Generate LaTeX tables
+python analysis/scripts/generate_latex_tables.py --csv data/fixtures/monte_carlo/samples.csv
 
-# 4. View outputs
-ls -lh /tmp/monte_carlo_*
+# 4. Optional: run tests
+pytest -v
 ```
-
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
-
-**"Module not found" error**
-- Cause: Running from wrong directory
-- Solution: Always run from project root
-
-**"File not found" error**
-- Cause: CSV file doesn't exist or wrong path
-- Solution: Generate data first or verify path
-
-**"Permission denied" writing to /tmp/**
-- Cause: No write permissions
-- Solution: Check permissions or modify script output directory
-
-**Import errors in scripts**
-- Cause: Missing dependencies
-- Solution: `python3.13 -m pip install -r requirements.txt`
+* **Module not found** → run from project root
+* **File not found** → generate data first or verify path
+* **Permission denied** → check output directory permissions
+* **Import errors** → install missing dependencies (`requirements.txt` / `requirements-dev.txt`)
 
 ---
 
 ## Related Documentation
 
-- `docs/DATASET_SPECIFICATION.md` - Data format specifications
-- `docs/RESULTS_ANALYSIS.md` - Analysis methodology
-- `analysis/README.md` - Detailed analysis module documentation
+* `docs/DATASET_SPECIFICATION.md` – Data format
+* `docs/RESULTS_ANALYSIS.md` – Analysis methodology
+* `analysis/README.md` – Analysis module details
