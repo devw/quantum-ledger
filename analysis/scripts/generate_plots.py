@@ -36,7 +36,7 @@ class MonteCarloPlotter:
         scatter = ax.scatter(
             self.df['tx_rate'],
             self.df['block_size'],
-            c=self.df['network_latency'],
+            c=self.df['latency_avg'],
             cmap='viridis',
             alpha=0.6,
             s=50,
