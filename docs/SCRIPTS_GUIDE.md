@@ -8,56 +8,89 @@ Guide to all executable scripts in the project. Run all commands from the projec
 - [Data Generation](#data-generation)
 - [Data Analysis & Visualization](#data-analysis--visualization)
 - [Testing](#testing)
-- [Complete Workflow Example](#complete-workflow-example)
 - [Troubleshooting](#troubleshooting)
-- [Related Documentation](#related-documentation)
 
 ---
 
 ## Prerequisites
 
-Install project dependencies:
+Install dependencies:
 
 ```bash
-python3.13 -m pip install -r requirements.txt         # runtime deps
-python3.13 -m pip install -r requirements-dev.txt     # dev & test deps
-````
+pip install -r requirements.txt         # runtime deps
+pip install -r requirements-dev.txt     # dev & test deps
+```
 
 ---
 
 ## Data Generation
 
-Generate synthetic Monte Carlo data:
+**Script:** `tools/scripts/generate_benchmark_data.py`
 
-**Script:** `tools/scripts/generate_mock_data.py`
+### Quick Examples
 
 ```bash
-# Default: 1000 samples
-python tools/scripts/generate_mock_data.py --iterations 1000 --output data/fixtures/monte_carlo/samples.csv
+# Minimal test (2 files, 10 seconds)
+python tools/scripts/generate_benchmark_data.py \
+    --crypto-modes ECDSA \
+    --load-profiles LOWLOAD \
+    --runs 2 \
+    --duration 10 \
+    --output-dir data/fixtures/monte_carlo/test/
 
-# Custom samples
-python tools/scripts/generate_mock_data.py --iterations 5000 --output data/raw/my_samples.csv
+# Workshop dataset (18 files, 5 minutes each)
+python tools/scripts/generate_benchmark_data.py \
+    --crypto-modes ECDSA DILITHIUM3 HYBRID \
+    --load-profiles LOWLOAD HIGHLOAD \
+    --runs 3 \
+    --duration 300 \
+    --output-dir data/fixtures/monte_carlo/workshop/
+
+# Complete dataset (60 files, 10 minutes each)
+python tools/scripts/generate_benchmark_data.py \
+    --crypto-modes ECDSA DILITHIUM3 HYBRID \
+    --load-profiles LOWLOAD MEDIUMLOAD HIGHLOAD SUSTAINED \
+    --runs 5 \
+    --duration 600 \
+    --output-dir data/raw/complete/
+
+# Reproducible (same data every time)
+python tools/scripts/generate_benchmark_data.py \
+    --crypto-modes ECDSA DILITHIUM3 HYBRID \
+    --load-profiles LOWLOAD HIGHLOAD \
+    --runs 3 \
+    --duration 300 \
+    --seed 42 \
+    --output-dir data/fixtures/monte_carlo/reproducible/
 ```
+
+### CLI Options
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--crypto-modes` | `ECDSA DILITHIUM3 HYBRID` | Cryptographic algorithms |
+| `--load-profiles` | `LOWLOAD MEDIUMLOAD HIGHLOAD SUSTAINED` | Workload patterns |
+| `--runs` | `1-N` | Repetitions per combination |
+| `--duration` | seconds | Samples = duration (1/sec) |
+| `--output-dir` | path | CSV output directory |
+| `--seed` | integer | Fixed seed for reproducibility |
+| `--quiet` | flag | Suppress output |
+
+**Output:** `{CRYPTO_MODE}_{LOAD_PROFILE}_RUN{N}.csv` (13 columns per file)
+
+**Note:** CSV files are NOT committed to git (regenerate with `--seed 42` for reproducibility).
 
 ---
 
 ## Data Analysis & Visualization
 
-### Generate Plots
-
-**Script:** `analysis/scripts/generate_plots.py`
+**Generate Plots:** `analysis/scripts/generate_plots.py`
 
 ```bash
-# Default CSV
-python analysis/scripts/generate_plots.py
-
-# Custom CSV
-python analysis/scripts/generate_plots.py --csv data/raw/my_samples.csv
+python analysis/scripts/generate_plots.py --csv data/fixtures/monte_carlo/workshop/ECDSA_LOWLOAD_RUN1.csv
 ```
 
-### Generate LaTeX Tables
-
-**Script:** `analysis/scripts/generate_latex_tables.py`
+**Generate LaTeX Tables:** `analysis/scripts/generate_latex_tables.py`
 
 ```bash
 python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
@@ -67,49 +100,27 @@ python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
 
 ## Testing
 
-Run all tests using pytest:
-
 ```bash
-# Run all tests with verbose output
-pytest -v
-
-# Run a single test file
-pytest -v tests/unit/tools/data_generation/test_distributions.py
-```
-
-Tests use **fixtures** for configuration and are automatically compatible with pytest.
-
----
-
-## Complete Workflow Example
-
-```bash
-# 1. Generate data
-python tools/scripts/generate_mock_data.py --iterations 2000 --output data/fixtures/monte_carlo/samples.csv
-
-# 2. Generate plots
-python analysis/scripts/generate_plots.py --csv data/fixtures/monte_carlo/samples.csv
-
-# 3. Generate LaTeX tables
-python analysis/scripts/generate_latex_tables.py --csv data/fixtures/monte_carlo/samples.csv
-
-# 4. Optional: run tests
-pytest -v
+pytest -v                                                    # All tests
+pytest -v tests/unit/data_generation/                       # Data generation only
+pytest -v tests/unit/scripts/test_generate_mock_data.py     # CLI script tests
 ```
 
 ---
 
 ## Troubleshooting
 
-* **Module not found** → run from project root
-* **File not found** → generate data first or verify path
-* **Permission denied** → check output directory permissions
-* **Import errors** → install missing dependencies (`requirements.txt` / `requirements-dev.txt`)
+| Issue | Solution |
+|-------|----------|
+| Module not found | Run from project root |
+| Import errors | `pip install -r requirements.txt` |
+| Invalid mode/profile | See CLI options table above |
+
+**Verify installation:**
+```bash
+python -c "from tools.data_generation import samplers; print('✅ OK')"
+```
 
 ---
 
-## Related Documentation
-
-* `docs/DATASET_SPECIFICATION.md` – Data format
-* `docs/RESULTS_ANALYSIS.md` – Analysis methodology
-* `analysis/README.md` – Analysis module details
+**See also:** `docs/DATASET_SPECIFICATION.md` for CSV format details
