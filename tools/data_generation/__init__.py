@@ -8,8 +8,6 @@ Modules:
     - distributions: Statistical distributions for metric generation
     - samplers: Data sampling and generation logic
     - exporters: CSV export functionality
-    - validators: Data validation and consistency checks
-    - monte_carlo_generator: Main orchestrator for data generation
 
 Version: 0.1.0 (MVP - Draft)
 """
@@ -17,11 +15,14 @@ Version: 0.1.0 (MVP - Draft)
 __version__ = "0.1.0"
 __author__ = "PQC Hyperledger Fabric Benchmark Team"
 
-# Package metadata
+# Import existing modules to make them available when importing the package
+from . import distributions
+from . import samplers
+from . import exporters
+
+# Package metadata - only list modules that actually exist
 __all__ = [
     "distributions",
     "samplers", 
     "exporters",
-    "validators",
-    "monte_carlo_generator"
 ]
