@@ -1,0 +1,281 @@
+# Configuration for PQC Hyperledger Fabric Mock Data Generation
+# This file defines parameters, ranges, and correlations for generating
+# realistic benchmark data for Post-Quantum Cryptography performance analysis.
+
+# ==============================================================================
+# CRYPTOGRAPHIC MODES
+# ==============================================================================
+# Define signature generation/verification times and performance characteristics
+# for each cryptographic mode: ECDSA (baseline), DILITHIUM3 (PQC), HYBRID (both)
+
+crypto_modes:
+  ECDSA:
+    description: "Elliptic Curve Digital Signature Algorithm (P-256) - Baseline"
+    sig_gen_time:      # Signature generation time in microseconds (μs)
+      mean: 100
+      std: 25
+      min: 50
+      max: 150
+    sig_verify_time:   # Signature verification time in microseconds (μs)
+      mean: 180
+      std: 40
+      min: 100
+      max: 250
+    performance_factor: 1.0  # Baseline throughput multiplier
+    latency_overhead: 1.0    # Baseline latency multiplier
+    cpu_overhead: 1.0        # Baseline CPU utilization multiplier
+    
+  DILITHIUM3:
+    description: "CRYSTALS-Dilithium Level 3 - NIST PQC Standard"
+    sig_gen_time:
+      mean: 350
+      std: 80
+      min: 200
+      max: 500
+    sig_verify_time:
+      mean: 1100
+      std: 200
+      min: 800
+      max: 1500
+    performance_factor: 0.70  # 30% throughput reduction due to crypto overhead
+    latency_overhead: 1.8     # 80% latency increase
+    cpu_overhead: 1.6         # 60% CPU increase
+    
+  HYBRID:
+    description: "Hybrid ECDSA + DILITHIUM3 - Transition strategy"
+    sig_gen_time:
+      mean: 450
+      std: 100
+      min: 250
+      max: 650
+    sig_verify_time:
+      mean: 1300
+      std: 220
+      min: 900
+      max: 1750
+    performance_factor: 0.85  # 15% throughput reduction
+    latency_overhead: 1.4     # 40% latency increase
+    cpu_overhead: 1.3         # 30% CPU increase
+
+# ==============================================================================
+# LOAD PROFILES
+# ==============================================================================
+# Define workload characteristics: transaction rates, latency baselines, and
+# resource utilization patterns for different load scenarios
+
+load_profiles:
+  LOWLOAD:
+    description: "Low load - Baseline performance measurement"
+    target_tps: 100         # Target transactions per second
+    variance: 0.10          # ±10% variance in tx_rate
+    min_tps: 50
+    max_tps: 150
+    latency_base: 75        # Baseline latency in milliseconds (for ECDSA)
+    latency_variance: 0.08  # ±8% variance in latency
+    cpu_base: 28            # Baseline CPU utilization percentage
+    mem_base: 45            # Baseline memory utilization percentage
+    
+  MEDIUMLOAD:
+    description: "Medium load - Normal operating conditions"
+    target_tps: 300
+    variance: 0.15          # ±15% variance
+    min_tps: 200
+    max_tps: 400
+    latency_base: 150
+    latency_variance: 0.12
+    cpu_base: 55
+    mem_base: 58
+    
+  HIGHLOAD:
+    description: "High load - Peak capacity testing"
+    target_tps: 600
+    variance: 0.20          # ±20% variance (more instability)
+    min_tps: 500
+    max_tps: 800
+    latency_base: 280
+    latency_variance: 0.15
+    cpu_base: 85
+    mem_base: 72
+    
+  SUSTAINED:
+    description: "Sustained load - Long-term stability testing"
+    target_tps: 400
+    variance: 0.15
+    min_tps: 300
+    max_tps: 500
+    latency_base: 200
+    latency_variance: 0.12
+    cpu_base: 65
+    mem_base: 62
+    duration: 1800          # 30 minutes (for future extended tests)
+    drift_factor: 0.05      # 5% performance drift over time
+
+# ==============================================================================
+# METRIC SPECIFICATIONS
+# ==============================================================================
+# Define ranges, units, and calculation methods for all performance metrics
+
+metrics:
+  latency_avg:
+    description: "Average transaction latency"
+    unit: "milliseconds"
+    calculation: "load_profile.latency_base * crypto_mode.latency_overhead"
+    # Dynamically calculated based on load profile and crypto mode
+    
+  latency_p95:
+    description: "95th percentile latency"
+    unit: "milliseconds"
+    multiplier_mean: 2.0    # latency_p95 ≈ latency_avg * 2.0
+    multiplier_std: 0.25    # variance in the multiplier
+    min_ratio: 1.5          # latency_p95 >= latency_avg * 1.5
+    max_ratio: 2.5          # latency_p95 <= latency_avg * 2.5
+    
+  cpu_util:
+    description: "CPU utilization percentage"
+    unit: "percentage"
+    calculation: "load_profile.cpu_base * crypto_mode.cpu_overhead"
+    min: 20
+    max: 95
+    noise_std: 3            # ±3% random noise for realism
+    
+  mem_util:
+    description: "Memory utilization percentage"
+    unit: "percentage"
+    min: 30
+    max: 80
+    tx_rate_sensitivity: 0.04  # mem increases 4% per 100 TPS
+    noise_std: 2               # ±2% random noise
+    
+  block_size:
+    description: "Block size in bytes"
+    unit: "bytes"
+    base: 1024
+    min: 500
+    max: 2500
+    tx_rate_factor: 1.5     # block_size increases with tx_rate
+    noise_std: 50           # ±50 bytes variance
+    
+  block_commit_time:
+    description: "Block commit time"
+    unit: "milliseconds"
+    base: 50
+    min: 30
+    max: 200
+    block_size_sensitivity: 0.08  # 8ms increase per 1KB
+    crypto_overhead_factor: 0.3   # PQC increases commit time
+    noise_std: 5
+
+# ==============================================================================
+# CORRELATION COEFFICIENTS
+# ==============================================================================
+# Expected correlations between variables (for validation and realism checks)
+
+correlations:
+  tx_rate_vs_latency: -0.60      # Negative: higher throughput = higher latency under load
+  tx_rate_vs_cpu: 0.85           # Strong positive: more transactions = more CPU
+  block_size_vs_commit_time: 0.60  # Moderate positive
+  crypto_complexity_vs_latency: 0.75  # PQC modes increase latency
+  load_profile_vs_variance: 0.70   # Higher load = more variability
+
+# ==============================================================================
+# SAMPLING CONFIGURATION
+# ==============================================================================
+# Timestamp generation and sampling interval settings
+
+sampling:
+  interval: 1.0              # Seconds between samples (1 row per second)
+  start_timestamp: 1735920000  # Unix epoch: 2025-01-03 12:00:00 UTC
+  timestamp_jitter: 0.01     # ±10ms jitter for realism (optional)
+
+# ==============================================================================
+# VALIDATION RULES
+# ==============================================================================
+# Constraints to ensure generated data is realistic and physically plausible
+
+validation:
+  # Latency constraints
+  latency_p95_min_ratio: 1.5      # p95 must be >= avg * 1.5
+  latency_p95_max_ratio: 2.5      # p95 must be <= avg * 2.5
+  
+  # Cryptographic performance constraints
+  dilithium3_sig_verify_min_factor: 3.0  # DILITHIUM3 verify >= ECDSA * 3
+  dilithium3_sig_gen_min_factor: 2.0     # DILITHIUM3 gen >= ECDSA * 2
+  hybrid_verify_min_factor: 4.5          # HYBRID verify >= ECDSA * 4.5
+  
+  # Crypto tax (percentage of latency spent on crypto operations)
+  crypto_tax_min: 1.0       # At least 1% of latency is crypto
+  crypto_tax_max: 50.0      # At most 50% of latency is crypto
+  
+  # Resource utilization bounds
+  cpu_util_min: 0
+  cpu_util_max: 100
+  mem_util_min: 0
+  mem_util_max: 100
+  
+  # Throughput sanity checks
+  tx_rate_min: 10           # Minimum viable TPS
+  tx_rate_max: 1000         # Maximum realistic TPS for Fabric
+
+# ==============================================================================
+# OUTPUT CONFIGURATION
+# ==============================================================================
+# File naming, formatting, and column ordering
+
+output:
+  filename_pattern: "{crypto_mode}_{load_profile}_RUN{run_number}.csv"
+  decimal_precision: 3      # Round floats to 3 decimal places
+  
+  # Column order in output CSV (must match specification)
+  columns:
+    - timestamp
+    - crypto_mode
+    - load_profile
+    - run_id
+    - tx_rate
+    - latency_avg
+    - latency_p95
+    - cpu_util
+    - mem_util
+    - block_size
+    - block_commit_time
+    - sig_gen_time
+    - sig_verify_time
+  
+  # CSV formatting options
+  csv_options:
+    delimiter: ","
+    quoting: "minimal"
+    line_terminator: "\n"
+    encoding: "utf-8"
+
+# ==============================================================================
+# ADVANCED OPTIONS (for future extensions)
+# ==============================================================================
+
+advanced:
+  # Enable time-series drift (performance degradation over long runs)
+  enable_drift: false
+  drift_rate: 0.001          # 0.1% performance drop per minute
+  
+  # Enable anomaly injection (for robustness testing)
+  enable_anomalies: false
+  anomaly_probability: 0.01  # 1% chance per sample
+  
+  # Random seed for reproducibility
+  random_seed: null          # null = random, integer = fixed seed
+
+# ==============================================================================
+# METADATA
+# ==============================================================================
+
+metadata:
+  version: "1.0.0"
+  author: "PQC Hyperledger Fabric Benchmark Team"
+  last_updated: "2025-01-03"
+  specification_doc: "docs/DATASET_SPECIFICATION.md"
+  description: |
+    Configuration file for generating mock benchmark data for Post-Quantum
+    Cryptography performance evaluation on Hyperledger Fabric. This config
+    defines realistic ranges, correlations, and constraints for all metrics
+    across different cryptographic modes (ECDSA, DILITHIUM3, HYBRID) and
+    load profiles (LOWLOAD, MEDIUMLOAD, HIGHLOAD, SUSTAINED).

@@ -40,7 +40,12 @@ data/processed/*.csv
 # Monte Carlo generated data
 data/fixtures/monte_carlo/*.csv
 data/fixtures/monte_carlo/*.json
+data/fixtures/monte_carlo/test_minimal/
+data/fixtures/monte_carlo/test_pqc/
+data/fixtures/monte_carlo/workshop/
+data/fixtures/monte_carlo/*.csv
 !data/fixtures/monte_carlo/.gitkeep
+
 
 # Docker
 *.pid

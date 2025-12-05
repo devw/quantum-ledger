@@ -32,59 +32,69 @@ This project provides a reproducible environment to:
 
 ```
 .
-├── docs/              # 📚 Technical Documentation
-│   ├── ARCHITECTURE.md              # System design and PQC integration points
-│   ├── CRYPTOGRAPHIC_MODES.md       # ECDSA, PQC-only, and Hybrid specifications
-│   ├── METRICS_SPECIFICATION.md     # Performance metrics definitions
-│   ├── DEPLOYMENT_GUIDE.md          # Setup and installation instructions
-│   ├── BENCHMARK_PROTOCOL.md        # Experimental methodology
-│   ├── DATASET_SPECIFICATION.md     # Data format and naming conventions
-│   ├── RESULTS_ANALYSIS.md          # Statistical analysis guidelines
-│   └── IMPLEMENTATION_NOTES.md      # Technical challenges and solutions
+├── .gitignore                     # 🗑️ Files to ignore in Git
+├── README.md                      # 📄 Project overview and entry point
+├── requirements.txt               # 📦 Python dependencies for the project
 │
-├── src/               # 💻 Core Application Code
-│   ├── fabric/        # Hyperledger Fabric modifications and chaincode
-│   ├── pqc/           # Post-quantum cryptographic implementations
-│   └── sdk/           # Client SDK extensions for PQC signing
+├── analysis/                      # 📈 Data Analysis & Visualization
+│   ├── figures/                   # Generated charts and graphs
+│   ├── notebooks/                 # Jupyter notebooks for exploratory analysis
+│   ├── README.md                  # Documentation for the analysis process
+│   └── scripts/                   # Statistical analysis and table generation scripts
 │
-├── tools/             # ⚙️ Automation & Benchmarking
-│   ├── benchmark/     # Caliper configurations and workload generators
-│   ├── scripts/       # Deployment, testing, and data collection scripts
-│   └── monitoring/    # Performance monitoring and logging utilities
+├── artifacts/                     # 📦 Build Outputs (gitignored)
+│   # Empty, reserved for temporary build files
 │
-├── simulations/       # 🧪 Experimental Scenarios
-│   ├── scenarios/     # Workload definitions (low/medium/high load)
-│   ├── networks/      # Network topology configurations (2/4/10/20 nodes)
-│   └── results/       # Simulation outputs and preliminary data
+├── data/                          # 📊 Dataset Management
+│   ├── fixtures/                  # Test data, config, and Monte Carlo seed configurations
+│   ├── processed/                 # Cleaned and aggregated analysis-ready data
+│   └── raw/                       # Raw benchmark outputs (CSV, logs)
 │
-├── tests/             # ✅ Test Suites
-│   ├── unit/          # Unit tests for PQC modules and CSP implementations
-│   ├── integration/   # Integration tests for Fabric + PQC workflows
-│   └── e2e/           # End-to-end scenario validation tests
+├── docker/                        # 🐳 Container Infrastructure
+│   ├── compose/                   # Docker Compose orchestration files
+│   ├── configs/                   # Fabric network configurations
+│   └── images/                    # Custom Dockerfiles (Fabric+PQC, Caliper)
 │
-├── data/              # 📊 Dataset Management
-│   ├── raw/           # Raw benchmark outputs (CSV, logs)
-│   ├── processed/     # Cleaned and aggregated analysis-ready data
-│   └── fixtures/      # Test data and seed configurations
+├── docs/                          # 📚 Technical Documentation
+│   ├── ARCHITECTURE.md            # System design and PQC integration points
+│   ├── BENCHMARK_PROTOCOL.md      # Experimental methodology
+│   ├── CRYPTOGRAPHIC_MODES.md     # ECDSA, PQC-only, and Hybrid specifications
+│   ├── DATASET_SPECIFICATION.md   # Data format and naming conventions
+│   ├── DEPLOYMENT_GUIDE.md        # Setup and installation instructions
+│   ├── IMPLEMENTATION_NOTES.md    # Technical challenges and solutions
+│   ├── METRICS_SPECIFICATION.md   # Performance metrics definitions
+│   ├── README.md                  # Index for documentation
+│   ├── RESULTS_ANALYSIS.md        # Statistical analysis guidelines
+│   └── SCRIPTS_GUIDE.md           # Guide for custom scripts
 │
-├── analysis/          # 📈 Data Analysis & Visualization
-│   ├── notebooks/     # Jupyter notebooks for exploratory analysis
-│   ├── scripts/       # Statistical analysis scripts (Python/R)
-│   └── figures/       # Generated charts and graphs for publications
+├── simulations/                   # 🧪 Experimental Scenarios
+│   ├── networks/                  # Network topology configurations
+│   ├── README.md                  # Documentation for running simulations
+│   ├── results/                   # Simulation outputs and preliminary data
+│   └── scenarios/                 # Workload definitions (low/medium/high load)
 │
-├── docker/            # 🐳 Container Infrastructure
-│   ├── images/        # Custom Dockerfiles (Fabric+PQC, Caliper)
-│   ├── compose/       # Docker Compose orchestration files
-│   └── configs/       # Fabric network configurations (crypto-config, configtx)
+├── src/                           # 💻 Core Application Code
+│   ├── fabric/                    # Hyperledger Fabric modifications and chaincode
+│   ├── pqc/                       # Post-quantum cryptographic implementations
+│   └── sdk/                       # Client SDK extensions for PQC signing
 │
-├── vm/                # 🖥️ Virtual Machine Orchestration
-│   ├── provisioning/  # Vagrant/Terraform scripts for VM infrastructure
-│   ├── ansible/       # Ansible playbooks for automated deployment
-│   └── inventory/     # VM inventory and network topology definitions
+├── tests/                         # ✅ Test Suites
+│   ├── e2e/                       # End-to-end scenario validation tests
+│   ├── integration/               # Integration tests for Fabric + PQC workflows
+│   ├── README.md                  # Documentation for the test suite
+│   └── unit/                      # Unit tests for PQC modules
 │
-└── artifacts/         # 📦 Build Outputs (gitignored)
-    ├── binaries/      # Compiled Fabric binaries and PQC libraries
-    └── certificates/  # Generated cryptographic materials (MSP, TLS)
+├── tools/                         # ⚙️ Automation & Data Generation
+│   ├── benchmark/                 # Caliper configurations and workload generators
+│   ├── data_generation/           # Utilities for creating synthetic datasets (e.g., Monte Carlo)
+│   ├── monitoring/                # Performance monitoring and logging utilities
+│   └── scripts/                   # Deployment and utility scripts (e.g., generate_benchmark_data)
+│
+└── vm/                            # 🖥️ Virtual Machine Orchestration
+    ├── ansible/                   # Ansible playbooks for automated deployment
+    ├── inventory/                 # VM inventory and network topology definitions
+    ├── provisioning/              # Vagrant/Terraform scripts for VM infrastructure
+    └── README.md                  # Documentation for VM setup
 ```
 
 ---

@@ -1,0 +1,39 @@
+# requirements-dev.txt
+# ===================
+# This file lists development dependencies for the project.
+# These packages are needed only for development, testing, and CI workflows,
+# and are NOT required for the runtime of the main application.
+#
+# To install these dependencies, run:
+#   pip install -r requirements-dev.txt
+
+# -------------------
+# Testing Frameworks
+# -------------------
+# pytest: the main testing framework used for unit, integration, and end-to-end tests.
+pytest>=8.0.0
+
+# pytest-cov: generates coverage reports for your tests.
+# pytest-cov>=5.0.0
+
+# -------------------
+# Optional / Utility Packages
+# -------------------
+# (Add any other dev tools you might use, e.g., linters, formatters, or mock libraries)
+
+# flake8: Python code style checker (optional)
+# flake8>=6.0.0
+
+# black: code formatter (optional)
+# black>=24.0.0
+
+# mypy: static type checker (optional)
+# mypy>=1.5.0
+
+# -------------------
+# Notes:
+# -------------------
+# - Keep this file separate from requirements.txt to clearly distinguish 
+#   runtime dependencies from development/testing dependencies.
+# - It is recommended to install this in a virtual environment to avoid polluting 
+#   the system Python installation.
