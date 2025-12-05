@@ -7,7 +7,7 @@
 # ==============================================================================
 # Define signature generation/verification times and performance characteristics
 # for each cryptographic mode: ECDSA (baseline), DILITHIUM3 (PQC), HYBRID (both)
-
+# sig_gen_time and sig_verify_time represent PER-TRANSACTION averages (not per-block)
 crypto_modes:
   ECDSA:
     description: "Elliptic Curve Digital Signature Algorithm (P-256) - Baseline"
