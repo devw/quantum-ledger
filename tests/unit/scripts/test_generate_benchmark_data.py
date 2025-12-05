@@ -1,5 +1,5 @@
 """
-Unit tests for generate_mock_data.py script
+Unit tests for generate_benchmark_data.py script
 
 Test coverage:
 - Config loading
@@ -15,7 +15,7 @@ import tempfile
 import shutil
 from pathlib import Path
 
-from tools.scripts import generate_mock_data
+from tools.scripts import generate_benchmark_data
 
 
 # ==============================================================================
@@ -58,7 +58,7 @@ def mock_args():
 
 def test_load_config():
     """Test loading configuration file"""
-    config = generate_mock_data.load_config("tools/data_generation/config.yaml")
+    config = generate_benchmark_data.load_config("tools/data_generation/config.yaml")
     assert isinstance(config, dict)
     assert "crypto_modes" in config
     assert "load_profiles" in config
@@ -67,7 +67,7 @@ def test_load_config():
 def test_load_config_nonexistent():
     """Test loading nonexistent config raises error"""
     with pytest.raises(FileNotFoundError):
-        generate_mock_data.load_config("nonexistent.yaml")
+        generate_benchmark_data.load_config("nonexistent.yaml")
 
 
 # ==============================================================================
@@ -76,14 +76,14 @@ def test_load_config_nonexistent():
 
 def test_validate_arguments_valid(mock_args, config):
     """Test validation with valid arguments"""
-    generate_mock_data.validate_arguments(mock_args, config)
+    generate_benchmark_data.validate_arguments(mock_args, config)
 
 
 def test_validate_arguments_invalid_crypto_mode(mock_args, config):
     """Test validation catches invalid crypto mode"""
     mock_args.crypto_modes = ["INVALID_MODE"]
     with pytest.raises(ValueError, match="Invalid crypto mode"):
-        generate_mock_data.validate_arguments(mock_args, config)
+        generate_benchmark_data.validate_arguments(mock_args, config)
 
 
 def test_validate_arguments_invalid_load_profile(mock_args, config):
@@ -91,7 +91,7 @@ def test_validate_arguments_invalid_load_profile(mock_args, config):
     mock_args.crypto_modes = ["ECDSA"]
     mock_args.load_profiles = ["INVALID_PROFILE"]
     with pytest.raises(ValueError, match="Invalid load profile"):
-        generate_mock_data.validate_arguments(mock_args, config)
+        generate_benchmark_data.validate_arguments(mock_args, config)
 
 
 # ==============================================================================
@@ -100,8 +100,8 @@ def test_validate_arguments_invalid_load_profile(mock_args, config):
 
 def test_calculate_num_samples():
     """Test sample calculation"""
-    assert generate_mock_data.calculate_num_samples(300) == 300
-    assert generate_mock_data.calculate_num_samples(300, 2.0) == 150
+    assert generate_benchmark_data.calculate_num_samples(300) == 300
+    assert generate_benchmark_data.calculate_num_samples(300, 2.0) == 150
 
 
 # ==============================================================================
@@ -110,7 +110,7 @@ def test_calculate_num_samples():
 
 def test_generate_data_basic(config, temp_output_dir):
     """Test basic data generation"""
-    stats = generate_mock_data.generate_data(
+    stats = generate_benchmark_data.generate_data(
         config=config,
         crypto_modes=["ECDSA"],
         load_profiles=["LOWLOAD"],
@@ -130,7 +130,7 @@ def test_generate_data_basic(config, temp_output_dir):
 
 def test_generate_data_multiple_combinations(config, temp_output_dir):
     """Test generating multiple combinations"""
-    stats = generate_mock_data.generate_data(
+    stats = generate_benchmark_data.generate_data(
         config=config,
         crypto_modes=["ECDSA", "DILITHIUM3"],
         load_profiles=["LOWLOAD", "HIGHLOAD"],
