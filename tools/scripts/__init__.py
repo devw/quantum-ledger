@@ -2,7 +2,7 @@
 Command-line Scripts for PQC Benchmarking
 
 This package contains executable scripts for:
-    - Mock data generation (generate_mock_data.py)
+    - Mock data generation (generate_benchmark_data.py)
     - Benchmark orchestration
     - Data preprocessing
 

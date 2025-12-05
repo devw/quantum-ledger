@@ -8,7 +8,7 @@ modes (ECDSA, DILITHIUM3, HYBRID) and load profiles (LOWLOAD, MEDIUMLOAD,
 HIGHLOAD, SUSTAINED).
 
 Usage:
-    python tools/scripts/generate_mock_data.py \\
+    python tools/scripts/generate_benchmark_data.py \\
         --crypto-modes ECDSA DILITHIUM3 HYBRID \\
         --load-profiles LOWLOAD HIGHLOAD \\
         --runs 3 \\
@@ -225,7 +225,7 @@ def main():
         epilog="""
 Examples:
   # Generate for ECDSA with LOWLOAD (3 runs, 5 minutes each)
-  python tools/scripts/generate_mock_data.py \\
+  python tools/scripts/generate_benchmark_data.py \\
       --crypto-modes ECDSA \\
       --load-profiles LOWLOAD \\
       --runs 3 \\
@@ -233,7 +233,7 @@ Examples:
       --output-dir data/fixtures/monte_carlo/
 
   # Generate all combinations for workshop
-  python tools/scripts/generate_mock_data.py \\
+  python tools/scripts/generate_benchmark_data.py \\
       --crypto-modes ECDSA DILITHIUM3 HYBRID \\
       --load-profiles LOWLOAD HIGHLOAD \\
       --runs 3 \\
@@ -241,7 +241,7 @@ Examples:
       --output-dir data/fixtures/monte_carlo/
 
   # Generate complete dataset for journal paper
-  python tools/scripts/generate_mock_data.py \\
+  python tools/scripts/generate_benchmark_data.py \\
       --crypto-modes ECDSA DILITHIUM3 HYBRID \\
       --load-profiles LOWLOAD MEDIUMLOAD HIGHLOAD SUSTAINED \\
       --runs 5 \\

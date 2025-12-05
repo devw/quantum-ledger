@@ -103,7 +103,7 @@ python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
 ```bash
 pytest -v                                                    # All tests
 pytest -v tests/unit/data_generation/                       # Data generation only
-pytest -v tests/unit/scripts/test_generate_mock_data.py     # CLI script tests
+pytest -v tests/unit/scripts/test_generate_benchmark_data.py     # CLI script tests
 ```
 
 ---

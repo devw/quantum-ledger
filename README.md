@@ -88,7 +88,7 @@ This project provides a reproducible environment to:
 │   ├── benchmark/                 # Caliper configurations and workload generators
 │   ├── data_generation/           # Utilities for creating synthetic datasets (e.g., Monte Carlo)
 │   ├── monitoring/                # Performance monitoring and logging utilities
-│   └── scripts/                   # Deployment and utility scripts (e.g., generate_mock_data)
+│   └── scripts/                   # Deployment and utility scripts (e.g., generate_benchmark_data)
 │
 └── vm/                            # 🖥️ Virtual Machine Orchestration
     ├── ansible/                   # Ansible playbooks for automated deployment
