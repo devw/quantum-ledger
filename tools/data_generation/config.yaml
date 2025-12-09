@@ -7,7 +7,12 @@
 # ==============================================================================
 # Define signature generation/verification times and performance characteristics
 # for each cryptographic mode: ECDSA (baseline), DILITHIUM3 (PQC), HYBRID (both)
-# sig_gen_time and sig_verify_time represent PER-TRANSACTION averages (not per-block)
+#
+# IMPORTANT: sig_gen_time and sig_verify_time are PER-TRANSACTION averages (μs),
+#            NOT per-block aggregates. For a sample with tx_rate=100 TPS:
+#            - Total gen overhead = tx_rate × sig_gen_time (e.g., 100 × 100μs = 10ms)
+#            - Total verify overhead = tx_rate × sig_verify_time (e.g., 100 × 180μs = 18ms)
+
 crypto_modes:
   ECDSA:
     description: "Elliptic Curve Digital Signature Algorithm (P-256) - Baseline"
