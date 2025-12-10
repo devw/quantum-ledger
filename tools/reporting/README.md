@@ -15,9 +15,6 @@ python tools/reporting/generate_performance_curve.py \
 python tools/reporting/generate_overhead_breakdown.py \
     --csv data/fixtures/monte_carlo/workshop/*_LOWLOAD_RUN1.csv
 
-python tools/reporting/generate_plots.py \
-    --csv data/fixtures/monte_carlo/workshop/ECDSA_LOWLOAD_RUN1.csv
-
 python tools/reporting/generate_latex_tables.py \
     --csv data/raw/my_samples.csv
 ```
@@ -28,7 +25,6 @@ python tools/reporting/generate_latex_tables.py \
 |--------|--------|-------------|
 | `generate_performance_curve.py` | PNG | TPS vs P95 Latency scatter plot with trend line |
 | `generate_overhead_breakdown.py` | PNG | Stacked bar chart: sig_gen + sig_verify by crypto mode |
-| `generate_plots.py` | PNG | Time-series analysis plots |
 | `generate_latex_tables.py` | TEX | Statistical summary tables |
 
 ## Common Options

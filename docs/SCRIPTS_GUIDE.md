@@ -59,11 +59,6 @@ python tools/reporting/generate_performance_curve.py \
     --output /tmp/performance_curve.png
 ```
 
-**Time-Series Plots:**
-```bash
-python tools/reporting/generate_plots.py \
-    --csv data/fixtures/monte_carlo/workshop/ECDSA_LOWLOAD_RUN1.csv
-```
 
 ### Table Generators
 
