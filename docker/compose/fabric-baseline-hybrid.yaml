@@ -13,12 +13,11 @@ services:
     platform: linux/amd64
     container_name: peer0.org1.hybrid.fabric.local
     environment:
-      - CORE_PEER_ID=peer0.org1.hybrid.fabric.local
-      - CORE_PEER_ADDRESS=peer0.org1.hybrid.fabric.local:7051
-      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
-      - CORE_PEER_LOCALMSPID=Org1MSP
-      - CORE_PEER_MSPCONFIGPATH=/etc/hyperledger/fabric/msp
-      - FABRIC_LOGGING_SPEC=INFO
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_BCCSP_DEFAULT=SW
+      - CORE_PEER_BCCSP_SW_HASH=SHA2
+      - CORE_PEER_BCCSP_SW_SECURITY=256
+      - CORE_PEER_BCCSP_DEFAULT_TYPE=HYBRID   # placeholder per futuro supporto PQ
     volumes:
       - ./configs/peer0-org1/msp:/etc/hyperledger/fabric/msp
       - peer0-org1-data:/var/hyperledger/production
@@ -32,13 +31,11 @@ services:
     platform: linux/amd64
     container_name: orderer.hybrid.fabric.local
     environment:
-      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
-      - ORDERER_GENERAL_LISTENPORT=7050
-      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-      - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/genesis.block
-      - FABRIC_LOGGING_SPEC=INFO
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_ORDERER_BCCSP_DEFAULT=SW
+      - CORE_ORDERER_BCCSP_SW_HASH=SHA2
+      - CORE_ORDERER_BCCSP_SW_SECURITY=256
+      - CORE_ORDERER_BCCSP_DEFAULT_TYPE=HYBRID  # placeholder PQC
     volumes:
       - ./configs/orderer/msp:/var/hyperledger/orderer/msp
       - ./configs/orderer/genesis.block:/var/hyperledger/orderer/genesis.block
