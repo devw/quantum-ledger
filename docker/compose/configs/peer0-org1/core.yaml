@@ -1,0 +1,16 @@
+# configs/peer0-org1/core.yaml
+peer:
+  id: peer0.org1.example.com
+  networkId: fabric-test
+  address: 0.0.0.0:7051
+  localMspId: Org1MSP
+  gossip:
+    bootstrap: 0.0.0.0:7051
+    useLeaderElection: true
+    orgLeader: false
+  fileSystemPath: /var/hyperledger/production
+  BCCSP:
+    Default: SW
+    SW:
+      Hash: SHA2
+      Security: 256

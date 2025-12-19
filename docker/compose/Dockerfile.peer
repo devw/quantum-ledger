@@ -1,0 +1,18 @@
+# Dockerfile.peer
+FROM hyperledger/fabric-peer:2.5
+
+# Set working directory
+WORKDIR /opt/gopath/src/github.com/hyperledger/fabric
+
+# Copia il provider HYBRID stub nella directory bccsp
+COPY bccsp/hybrid/ bccsp/hybrid/
+
+# Assicurati che le dipendenze Go siano aggiornate
+RUN go mod tidy
+
+# Ricompila il peer con il nuovo provider
+RUN make peer
+
+# Entrypoint rimane lo stesso
+ENTRYPOINT ["peer"]
+CMD ["node", "start"]

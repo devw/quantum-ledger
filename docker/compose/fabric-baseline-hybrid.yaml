@@ -1,0 +1,45 @@
+version: "3.8"
+
+networks:
+  fabric_net:
+    driver: bridge
+
+volumes:
+  peer0-org1-data:
+
+services:
+  peer0_org1:
+    image: custom-fabric-peer:2.5
+    platform: linux/amd64
+    container_name: peer0.org1.hybrid.fabric.local
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_PEER_BCCSP_DEFAULT=SW
+      - CORE_PEER_BCCSP_SW_HASH=SHA2
+      - CORE_PEER_BCCSP_SW_SECURITY=256
+      - CORE_PEER_BCCSP_DEFAULT_TYPE=HYBRID   # placeholder per futuro supporto PQ
+    volumes:
+      - ./configs/peer0-org1/msp:/etc/hyperledger/fabric/msp
+      - peer0-org1-data:/var/hyperledger/production
+    ports:
+      - "7051:7051"
+    networks:
+      - fabric_net
+
+  orderer:
+    image: hyperledger/fabric-orderer:2.5
+    platform: linux/amd64
+    container_name: orderer.hybrid.fabric.local
+    environment:
+      - FABRIC_CFG_PATH=/etc/hyperledger/fabric
+      - CORE_ORDERER_BCCSP_DEFAULT=SW
+      - CORE_ORDERER_BCCSP_SW_HASH=SHA2
+      - CORE_ORDERER_BCCSP_SW_SECURITY=256
+      - CORE_ORDERER_BCCSP_DEFAULT_TYPE=HYBRID  # placeholder PQC
+    volumes:
+      - ./configs/orderer/msp:/var/hyperledger/orderer/msp
+      - ./configs/orderer/genesis.block:/var/hyperledger/orderer/genesis.block
+    ports:
+      - "7050:7050"
+    networks:
+      - fabric_net
