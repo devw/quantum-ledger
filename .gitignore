@@ -55,3 +55,4 @@ configs/orderer/genesis.block
 configtx.yaml
 **/keystore/*_sk
 **/keystore/priv_sk
+**/genesis.block
