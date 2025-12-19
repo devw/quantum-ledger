@@ -1,24 +1,14 @@
 # Scripts Guide
 
-Guide to all executable scripts in the project. Run all commands from the project root.
-
-## 📋 Table of Contents
-
-- [Prerequisites](#prerequisites)
-- [Data Generation](#data-generation)
-- [Data Analysis & Visualization](#data-analysis--visualization)
-- [Testing](#testing)
-- [Troubleshooting](#troubleshooting)
+Executable scripts for data generation, analysis, and reporting. Run from project root.
 
 ---
 
 ## Prerequisites
 
-Install dependencies:
-
 ```bash
-pip install -r requirements.txt         # runtime deps
-pip install -r requirements-dev.txt     # dev & test deps
+pip install -r requirements.txt         # runtime
+pip install -r requirements-dev.txt     # dev/test
 ```
 
 ---
@@ -27,73 +17,63 @@ pip install -r requirements-dev.txt     # dev & test deps
 
 **Script:** `tools/scripts/generate_benchmark_data.py`
 
-### Quick Examples
-
 ```bash
-# Minimal test (2 files, 10 seconds)
+# Quick test (2 files, 10s each)
 python tools/scripts/generate_benchmark_data.py \
-    --crypto-modes ECDSA \
-    --load-profiles LOWLOAD \
-    --runs 2 \
-    --duration 10 \
+    --crypto-modes ECDSA --load-profiles LOWLOAD --runs 2 --duration 10 \
     --output-dir data/fixtures/monte_carlo/test/
 
-# Workshop dataset (18 files, 5 minutes each)
+# Workshop dataset (18 files, 5min each)
 python tools/scripts/generate_benchmark_data.py \
     --crypto-modes ECDSA DILITHIUM3 HYBRID \
-    --load-profiles LOWLOAD HIGHLOAD \
-    --runs 3 \
-    --duration 300 \
+    --load-profiles LOWLOAD HIGHLOAD --runs 3 --duration 300 \
     --output-dir data/fixtures/monte_carlo/workshop/
 
-# Complete dataset (60 files, 10 minutes each)
+# Reproducible (fixed seed)
 python tools/scripts/generate_benchmark_data.py \
     --crypto-modes ECDSA DILITHIUM3 HYBRID \
-    --load-profiles LOWLOAD MEDIUMLOAD HIGHLOAD SUSTAINED \
-    --runs 5 \
-    --duration 600 \
-    --output-dir data/raw/complete/
-
-# Reproducible (same data every time)
-python tools/scripts/generate_benchmark_data.py \
-    --crypto-modes ECDSA DILITHIUM3 HYBRID \
-    --load-profiles LOWLOAD HIGHLOAD \
-    --runs 3 \
-    --duration 300 \
-    --seed 42 \
-    --output-dir data/fixtures/monte_carlo/reproducible/
+    --load-profiles LOWLOAD HIGHLOAD --runs 3 --duration 300 \
+    --seed 42 --output-dir data/fixtures/monte_carlo/reproducible/
 ```
 
-### CLI Options
+**Options:** `--crypto-modes` (ECDSA|DILITHIUM3|HYBRID), `--load-profiles` (LOWLOAD|MEDIUMLOAD|HIGHLOAD|SUSTAINED), `--runs` (repetitions), `--duration` (seconds), `--seed` (reproducibility), `--quiet`
 
-| Option | Values | Description |
-|--------|--------|-------------|
-| `--crypto-modes` | `ECDSA DILITHIUM3 HYBRID` | Cryptographic algorithms |
-| `--load-profiles` | `LOWLOAD MEDIUMLOAD HIGHLOAD SUSTAINED` | Workload patterns |
-| `--runs` | `1-N` | Repetitions per combination |
-| `--duration` | seconds | Samples = duration (1/sec) |
-| `--output-dir` | path | CSV output directory |
-| `--seed` | integer | Fixed seed for reproducibility |
-| `--quiet` | flag | Suppress output |
-
-**Output:** `{CRYPTO_MODE}_{LOAD_PROFILE}_RUN{N}.csv` (13 columns per file)
-
-**Note:** CSV files are NOT committed to git (regenerate with `--seed 42` for reproducibility).
+**Output:** `{CRYPTO}_{LOAD}_RUN{N}.csv` (13 columns/file)
 
 ---
 
-## Data Analysis & Visualization
+## Visualization
 
-**Generate Plots:** `analysis/scripts/generate_plots.py`
-
+### Performance Curve (TPS vs P95 Latency)
 ```bash
-python analysis/scripts/generate_plots.py --csv data/fixtures/monte_carlo/workshop/ECDSA_LOWLOAD_RUN1.csv
+python -m tools.reporting.generate_performance_curve \
+    --csv data/fixtures/monte_carlo/workshop/ECDSA_LOWLOAD_RUN1.csv \
+    --output /tmp/performance_curve.png
 ```
 
-**Generate LaTeX Tables:** `analysis/scripts/generate_latex_tables.py`
-
+### Box Plot Comparison
 ```bash
-python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
+python -m tools.reporting.generate_box_plot \
+    --csv data/fixtures/monte_carlo/workshop/*.csv \
+    --metric latency_avg \
+    --output /tmp/latency_boxplot.png
+
+# Custom title
+python -m tools.reporting.generate_box_plot \
+    --csv data/fixtures/monte_carlo/workshop/ECDSA_*.csv \
+          data/fixtures/monte_carlo/workshop/DILITHIUM3_*.csv \
+          data/fixtures/monte_carlo/workshop/HYBRID_*.csv \
+    --metric sig_gen_time \
+    --output /tmp/sig_gen_comparison.png \
+    --title "Signature Generation: ECDSA vs Dilithium3 vs Hybrid"
+```
+
+**Supported metrics:** `latency_avg`, `latency_p95`, `tx_rate`, `cpu_util`, `mem_util`, `sig_gen_time`, `sig_verify_time`, `block_commit_time`, `block_size`
+
+### LaTeX Tables
+```bash
+python -m tools.reporting.generate_latex_tables \
+    --csv data/raw/my_samples.csv
 ```
 
 ---
@@ -101,26 +81,22 @@ python analysis/scripts/generate_latex_tables.py --csv data/raw/my_samples.csv
 ## Testing
 
 ```bash
-pytest -v                                                    # All tests
-pytest -v tests/unit/data_generation/                       # Data generation only
-pytest -v tests/unit/scripts/test_generate_benchmark_data.py     # CLI script tests
+pytest -v                                    # all tests
+pytest -v tests/unit/data_generation/        # data generation only
+pytest -v tests/unit/scripts/                # CLI scripts only
 ```
 
 ---
 
 ## Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
+| Issue | Fix |
+|-------|-----|
 | Module not found | Run from project root |
 | Import errors | `pip install -r requirements.txt` |
-| Invalid mode/profile | See CLI options table above |
+| Invalid parameters | Check options in sections above |
 
 **Verify installation:**
 ```bash
-python -c "from tools.data_generation import samplers; print('✅ OK')"
+python -c "from tools.data_generation import samplers; print('✅')"
 ```
-
----
-
-**See also:** `docs/DATASET_SPECIFICATION.md` for CSV format details
