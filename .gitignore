@@ -1,65 +1,55 @@
 # Python
 __pycache__/
 *.py[cod]
-*$py.class
-*.so
-.Python
 venv/
 env/
 *.egg-info/
 dist/
 build/
 
-# Jupyter Notebooks
+# Jupyter
 .ipynb_checkpoints/
-*.ipynb_checkpoints
 
-# IDE
+# IDE & OS
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Build artifacts (entire directory ignored via its own .gitignore)
+# Build artifacts
 artifacts/binaries/*
 artifacts/certificates/*
 !artifacts/.gitignore
 
-# Data files (don't commit large datasets)
+# Data files
 data/raw/*.csv
 data/processed/*.csv
+data/fixtures/monte_carlo/*.csv
+data/fixtures/monte_carlo/*.json
+data/fixtures/monte_carlo/test_*/
+data/fixtures/monte_carlo/workshop/
+!data/fixtures/monte_carlo/.gitkeep
 *.log
 *.gz
 *.zip
 *.tar
-# Monte Carlo generated data
-data/fixtures/monte_carlo/*.csv
-data/fixtures/monte_carlo/*.json
-data/fixtures/monte_carlo/test_minimal/
-data/fixtures/monte_carlo/test_pqc/
-data/fixtures/monte_carlo/workshop/
-data/fixtures/monte_carlo/*.csv
-!data/fixtures/monte_carlo/.gitkeep
 
-
-# Docker
+# Docker & temp
 *.pid
 *.seed
-*.pid.lock
-
-# Temporary files
 tmp/
 temp/
 *.tmp
 
-# Secrets
+# 🔒 Secrets & Fabric crypto
 *.key
 *.pem
 *.p12
 credentials.json
 .env
+configs/*/msp/
+configs/orderer/genesis.block
+configtx.yaml

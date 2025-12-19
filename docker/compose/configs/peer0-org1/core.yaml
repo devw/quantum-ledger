@@ -1,4 +1,4 @@
-# configs/peer0-org1/core.yaml minimale
+# configs/peer0-org1/core.yaml
 peer:
   id: peer0.org1.example.com
   networkId: fabric-test
@@ -9,3 +9,8 @@ peer:
     useLeaderElection: true
     orgLeader: false
   fileSystemPath: /var/hyperledger/production
+  BCCSP:
+    Default: SW
+    SW:
+      Hash: SHA2
+      Security: 256
