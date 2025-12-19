@@ -9,7 +9,7 @@ volumes:
 
 services:
   peer0_org1:
-    image: hyperledger/fabric-peer:2.5
+    image: custom-fabric-peer:2.5
     platform: linux/amd64
     container_name: peer0.org1.hybrid.fabric.local
     environment:
