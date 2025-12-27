@@ -1,18 +1,53 @@
-# Dockerfile.peer
-FROM hyperledger/fabric-peer:2.5
+# Single-stage build - Evita il problema del multi-stage FROM
+FROM hyperledger/fabric-tools:2.5
 
-# Set working directory
-WORKDIR /opt/gopath/src/github.com/hyperledger/fabric
+# Installa dipendenze di build
+RUN apt-get update && apt-get install -y \
+    git \
+    make \
+    gcc \
+    libtool \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia il provider HYBRID stub nella directory bccsp
+WORKDIR /workspace
+
+# Clona i sorgenti di Fabric 2.5
+RUN git clone --branch release-2.5 --depth 1 \
+    https://github.com/hyperledger/fabric.git
+
+WORKDIR /workspace/fabric
+
+# Copia il provider HYBRID custom
 COPY bccsp/hybrid/ bccsp/hybrid/
 
-# Assicurati che le dipendenze Go siano aggiornate
-RUN go mod tidy
+# Copia hybridfactory.go nella directory factory
+COPY docker/compose/hybridfactory.go bccsp/factory/
 
-# Ricompila il peer con il nuovo provider
+# Modifica nopkcs11.go per registrare HYBRID
+# 1. Aggiunge case HYBRID in initFactories (dopo il blocco SW)
+RUN sed -i '/^	if defaultBCCSP == nil {$/i \	// Hybrid BCCSP (ECDSA + PQC stub)\n\tif config.Default == "HYBRID" && config.SW != nil {\n\t\tf := \&HYBRIDFactory{}\n\t\tvar err error\n\t\tdefaultBCCSP, err = initBCCSP(f, config)\n\t\tif err != nil {\n\t\t\treturn errors.Wrapf(err, "Failed initializing HYBRID BCCSP")\n\t\t}\n\t}\n' bccsp/factory/nopkcs11.go
+
+# 2. Aggiunge case HYBRID in GetBCCSPFromOpts switch
+RUN sed -i '/case "SW":/a \	case "HYBRID":\n\t\tf = \&HYBRIDFactory{}' bccsp/factory/nopkcs11.go
+
+# Verifica le modifiche
+RUN echo "=== Verifica initFactories ===" && \
+    grep -A 8 "Hybrid BCCSP" bccsp/factory/nopkcs11.go && \
+    echo "=== Verifica GetBCCSPFromOpts ===" && \
+    grep -A 2 'case "HYBRID":' bccsp/factory/nopkcs11.go
+
+# Compila il binario peer
 RUN make peer
 
-# Entrypoint rimane lo stesso
-ENTRYPOINT ["peer"]
-CMD ["node", "start"]
+# Sostituisci il binario peer nel PATH
+RUN cp /workspace/fabric/build/bin/peer /usr/local/bin/peer
+
+# Verifica che il peer funzioni
+RUN peer version
+
+# Pulizia per ridurre dimensione immagine (opzionale)
+RUN rm -rf /workspace/fabric/.git \
+    && go clean -cache -modcache
+
+# Nessun ENTRYPOINT - lascia il default dell'immagine base
+CMD ["peer", "node", "start"]
