@@ -1,18 +1,37 @@
-# Dockerfile.peer
-FROM hyperledger/fabric-peer:2.5
+# Single-stage build - Evita il problema del multi-stage FROM
+FROM hyperledger/fabric-tools:2.5
 
-# Set working directory
-WORKDIR /opt/gopath/src/github.com/hyperledger/fabric
+# Installa dipendenze di build
+RUN apt-get update && apt-get install -y \
+    git \
+    make \
+    gcc \
+    libtool \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copia il provider HYBRID stub nella directory bccsp
+WORKDIR /workspace
+
+# Clona i sorgenti di Fabric 2.5
+RUN git clone --branch release-2.5 --depth 1 \
+    https://github.com/hyperledger/fabric.git
+
+WORKDIR /workspace/fabric
+
+# Copia il provider HYBRID custom
 COPY bccsp/hybrid/ bccsp/hybrid/
 
-# Assicurati che le dipendenze Go siano aggiornate
-RUN go mod tidy
-
-# Ricompila il peer con il nuovo provider
+# Compila il binario peer
 RUN make peer
 
-# Entrypoint rimane lo stesso
-ENTRYPOINT ["peer"]
-CMD ["node", "start"]
+# Sostituisci il binario peer nel PATH
+RUN cp /workspace/fabric/build/bin/peer /usr/local/bin/peer
+
+# Verifica che il peer funzioni
+RUN peer version
+
+# Pulizia per ridurre dimensione immagine (opzionale)
+RUN rm -rf /workspace/fabric/.git \
+    && go clean -cache -modcache
+
+# Nessun ENTRYPOINT - lascia il default dell'immagine base
+CMD ["peer", "node", "start"]
