@@ -20,12 +20,21 @@ WORKDIR /workspace/fabric
 # Copia il provider HYBRID custom
 COPY bccsp/hybrid/ bccsp/hybrid/
 
-# Modifica il peer per supportare HYBRID BCCSP
-# Aggiungiamo la registrazione del provider nel file principale
-RUN sed -i '/import (/a \\t_ "github.com/hyperledger/fabric/bccsp/hybrid"' cmd/peer/main.go || \
-    (echo 'package main' > cmd/peer/hybrid_init.go && \
-     echo '' >> cmd/peer/hybrid_init.go && \
-     echo 'import _ "github.com/hyperledger/fabric/bccsp/hybrid"' >> cmd/peer/hybrid_init.go)
+# Copia hybridfactory.go nella directory factory
+COPY docker/compose/hybridfactory.go bccsp/factory/
+
+# Modifica nopkcs11.go per registrare HYBRID
+# 1. Aggiunge case HYBRID in initFactories (dopo il blocco SW)
+RUN sed -i '/^	if defaultBCCSP == nil {$/i \	// Hybrid BCCSP (ECDSA + PQC stub)\n\tif config.Default == "HYBRID" && config.SW != nil {\n\t\tf := \&HYBRIDFactory{}\n\t\tvar err error\n\t\tdefaultBCCSP, err = initBCCSP(f, config)\n\t\tif err != nil {\n\t\t\treturn errors.Wrapf(err, "Failed initializing HYBRID BCCSP")\n\t\t}\n\t}\n' bccsp/factory/nopkcs11.go
+
+# 2. Aggiunge case HYBRID in GetBCCSPFromOpts switch
+RUN sed -i '/case "SW":/a \	case "HYBRID":\n\t\tf = \&HYBRIDFactory{}' bccsp/factory/nopkcs11.go
+
+# Verifica le modifiche
+RUN echo "=== Verifica initFactories ===" && \
+    grep -A 8 "Hybrid BCCSP" bccsp/factory/nopkcs11.go && \
+    echo "=== Verifica GetBCCSPFromOpts ===" && \
+    grep -A 2 'case "HYBRID":' bccsp/factory/nopkcs11.go
 
 # Compila il binario peer
 RUN make peer

@@ -1,0 +1,28 @@
+--- a/bccsp/factory/nopkcs11.go
++++ b/bccsp/factory/nopkcs11.go
+@@ -49,6 +49,15 @@ func initFactories(config *FactoryOpts) error {
+ 			return errors.Wrapf(err, "Failed initializing BCCSP")
+ 		}
+ 	}
++	
++	// Hybrid BCCSP (ECDSA + PQC stub)
++	if config.Default == "HYBRID" && config.SW != nil {
++		f := &HYBRIDFactory{}
++		var err error
++		defaultBCCSP, err = initBCCSP(f, config)
++		if err != nil {
++			return errors.Wrapf(err, "Failed initializing HYBRID BCCSP")
++		}
++	}
+ 
+ 	if defaultBCCSP == nil {
+ 		return errors.Errorf("Could not find default `%s` BCCSP", config.Default)
+@@ -63,6 +72,8 @@ func GetBCCSPFromOpts(config *FactoryOpts) (bccsp.BCCSP, error) {
+ 	switch config.Default {
+ 	case "SW":
+ 		f = &SWFactory{}
++	case "HYBRID":
++		f = &HYBRIDFactory{}
+ 	default:
+ 		return nil, errors.Errorf("Could not find BCCSP, no '%s' provider", config.Default)
+ 	}

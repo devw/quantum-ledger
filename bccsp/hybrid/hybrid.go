@@ -4,6 +4,7 @@ import (
 	"hash"
 
 	"github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger/fabric/bccsp/sw"
 )
 
 // HybridBCCSP è uno stub che per ora delega tutto al provider SW (ECDSA)
@@ -12,8 +13,14 @@ type HybridBCCSP struct {
 }
 
 // NewHybridBCCSP crea una nuova istanza del provider HYBRID
-func NewHybridBCCSP(sw bccsp.BCCSP) *HybridBCCSP {
-	return &HybridBCCSP{sw: sw}
+func NewHybridBCCSP(keyStore bccsp.KeyStore) (*HybridBCCSP, error) {
+	// Crea un provider SW interno
+	swBCCSP, err := sw.NewWithParams(256, "SHA2", keyStore)
+	if err != nil {
+		return nil, err
+	}
+	
+	return &HybridBCCSP{sw: swBCCSP}, nil
 }
 
 // KeyGen genera una chiave usando il provider SW
@@ -74,8 +81,8 @@ func init() {
 }
 
 // GetBCCSP ritorna un'istanza di HYBRID BCCSP configurata
-func GetBCCSP(swBCCSP bccsp.BCCSP) bccsp.BCCSP {
-	return NewHybridBCCSP(swBCCSP)
+func GetBCCSP(keyStore bccsp.KeyStore) (bccsp.BCCSP, error) {
+	return NewHybridBCCSP(keyStore)
 }
 
 // Verifica che HybridBCCSP implementi l'interfaccia BCCSP
