@@ -20,6 +20,13 @@ WORKDIR /workspace/fabric
 # Copia il provider HYBRID custom
 COPY bccsp/hybrid/ bccsp/hybrid/
 
+# Modifica il peer per supportare HYBRID BCCSP
+# Aggiungiamo la registrazione del provider nel file principale
+RUN sed -i '/import (/a \\t_ "github.com/hyperledger/fabric/bccsp/hybrid"' cmd/peer/main.go || \
+    (echo 'package main' > cmd/peer/hybrid_init.go && \
+     echo '' >> cmd/peer/hybrid_init.go && \
+     echo 'import _ "github.com/hyperledger/fabric/bccsp/hybrid"' >> cmd/peer/hybrid_init.go)
+
 # Compila il binario peer
 RUN make peer
 
