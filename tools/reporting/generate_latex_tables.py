@@ -1,179 +1,120 @@
-#!/usr/bin/env python3
-"""
-Generate LaTeX table with summary statistics from Monte Carlo simulation CSV.
-Stores output in /tmp/ directory.
-
-Usage:
-    python analysis/scripts/generate_latex_tables.py
-    python analysis/scripts/generate_latex_tables.py --csv path/to/data.csv
-"""
-
 import argparse
+import glob
 import pandas as pd
 from pathlib import Path
-import sys
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
-from utils import CSVLoader, OutputManager
 
 
-class LaTeXFormatter:
-    """Responsible for LaTeX formatting (Single Responsibility Principle)."""
-    
-    @staticmethod
-    def format_table(df: pd.DataFrame, caption: str, label: str, precision: int = 2) -> str:
-        """
-        Generate a well-formatted LaTeX table from a DataFrame.
-        
-        Args:
-            df: DataFrame to convert
-            caption: Table caption
-            label: Table label for referencing
-            precision: Number of decimal places for float formatting
-        
-        Returns:
-            LaTeX table as string
-        """
-        df_formatted = df.copy()
-        
-        # Format numeric columns
-        for col in df_formatted.columns:
-            if df_formatted[col].dtype in ['float64', 'float32']:
-                df_formatted[col] = df_formatted[col].apply(
-                    lambda x: f"{x:.{precision}f}" if pd.notna(x) else "N/A"
-                )
-        
-        # Column alignment
-        num_cols = len(df.columns)
-        alignment = 'l' + 'r' * num_cols
-        
-        # Build LaTeX table
-        latex = [
-            r"\begin{table}[htbp]",
-            r"  \centering",
-            f"  \\caption{{{caption}}}",
-            f"  \\label{{{label}}}",
-            f"  \\begin{{tabular}}{{{alignment}}}",
-            r"    \toprule"
-        ]
-        
-        # Header row
-        header = " & ".join([df.index.name or "Metric"] + [str(col) for col in df.columns])
-        latex.append(f"    {header} \\\\")
-        latex.append(r"    \midrule")
-        
-        # Data rows
-        for idx, row in df_formatted.iterrows():
-            row_data = " & ".join([str(idx)] + [str(val) for val in row.values])
-            latex.append(f"    {row_data} \\\\")
-        
-        # End table
-        latex.extend([
-            r"    \bottomrule",
-            r"  \end{tabular}",
-            r"\end{table}"
-        ])
-        
-        return "\n".join(latex)
+METRICS = [
+    "tx_rate",
+    "latency_avg",
+    "latency_p95",
+    "sig_gen_time",
+    "sig_verify_time",
+]
 
 
-class SummaryStatisticsCalculator:
-    """Responsible for calculating summary statistics (Single Responsibility)."""
-    
-    def __init__(self, df: pd.DataFrame):
-        self.df = df
-    
-    def calculate(self) -> pd.DataFrame:
-        """Calculate comprehensive summary statistics."""
-        numeric_df = self.df.select_dtypes(include=['number'])
-        
-        if numeric_df.empty:
-            raise ValueError("No numeric columns found in DataFrame")
-        
-        # Calculate statistics
-        stats = pd.DataFrame({
-            'Mean': numeric_df.mean(),
-            'Std Dev': numeric_df.std(),
-            'Min': numeric_df.min(),
-            'Q1 (25%)': numeric_df.quantile(0.25),
-            'Median': numeric_df.median(),
-            'Q3 (75%)': numeric_df.quantile(0.75),
-            'Max': numeric_df.max(),
-            'Count': numeric_df.count()
-        })
-        
-        return stats.T
+def load_csvs(patterns):
+    frames = []
+    for pattern in patterns:
+        for path in glob.glob(pattern):
+            frames.append(pd.read_csv(path))
+    if not frames:
+        raise ValueError("No CSV files found.")
+    return pd.concat(frames, ignore_index=True)
 
 
-class LaTeXTableGenerator:
-    """Orchestrates the LaTeX table generation process."""
-    
-    def __init__(self, csv_path: str, output_dir: str = "/tmp"):
-        self.csv_loader = CSVLoader(csv_path)
-        self.output_manager = OutputManager(output_dir)
-        self.formatter = LaTeXFormatter()
-        self.df = None
-    
-    def run(self):
-        """Execute table generation workflow."""
-        self._print_header()
-        self.df = self.csv_loader.load()
-        self._generate_table()
-        self._print_footer()
-    
-    def _generate_table(self):
-        """Generate summary statistics table."""
-        print(f"\n📁 Output directory: {self.output_manager.output_dir}")
-        print("\n📊 Generating LaTeX table...")
+def aggregate_stats(df):
+    grouped = (
+        df.groupby(["crypto_mode", "load_profile"])[METRICS]
+        .agg(["mean", "std"])
+        .reset_index()
+    )
+    return grouped
+
+
+def format_mean_std(mean, std, precision=2):
+    return f"{mean:.{precision}f} $\\pm$ {std:.{precision}f}"
+
+
+def to_latex_table(df):
+    rows = []
+
+    for _, row in df.iterrows():
+        # Fix: Access the scalar values directly from the first level
+        crypto = row["crypto_mode"]
+        load = row["load_profile"]
         
-        try:
-            # Calculate statistics
-            calculator = SummaryStatisticsCalculator(self.df)
-            stats = calculator.calculate()
-            
-            # Format as LaTeX
-            latex_table = self.formatter.format_table(
-                stats,
-                caption="Summary Statistics of Monte Carlo Simulation Parameters",
-                label="tab:monte_carlo_stats",
-                precision=2
-            )
-            
-            # Save
-            self.output_manager.save_text(latex_table, "monte_carlo_statistics.tex")
-            
-        except ValueError as e:
-            print(f"  ⚠ Error: {e}")
-    
-    @staticmethod
-    def _print_header():
-        print("\n" + "="*60)
-        print("📋 Generating LaTeX Table")
-        print("="*60)
-    
-    @staticmethod
-    def _print_footer():
-        print("\n" + "="*60)
-        print("✅ LaTeX table generation complete!")
-        print("="*60 + "\n")
+        # Convert to string if they're not already
+        if isinstance(crypto, pd.Series):
+            crypto = crypto.iloc[0]
+        if isinstance(load, pd.Series):
+            load = load.iloc[0]
+
+        values = []
+        for metric in METRICS:
+            mean = row[(metric, "mean")]
+            std = row[(metric, "std")]
+            values.append(format_mean_std(mean, std))
+
+        rows.append(
+            " & ".join([str(crypto), str(load)] + values) + r" \\"
+        )
+
+    header = r"""
+\begin{table*}[t]
+\centering
+\caption{Performance metrics aggregated over runs (mean $\pm$ standard deviation).}
+\label{tab:crypto-performance}
+\rowcolors{1}{white}{lightgray}
+\begin{tabular}{llccccc}
+\toprule
+Crypto & Load &
+Tx Rate &
+Latency Avg &
+Latency P95 &
+Sig. Gen. Time &
+Sig. Verif. Time \\
+\midrule
+""".strip()
+
+    footer = r"""
+\bottomrule
+\end{tabular}
+\end{table*}
+""".strip()
+
+    return "\n".join([header] + rows + [footer])
 
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Generate LaTeX table with summary statistics from CSV data'
+        description="Generate LaTeX tables from PQC-Fabric benchmark CSVs"
     )
     parser.add_argument(
-        '--csv',
-        type=str,
-        default='data/fixtures/monte_carlo/samples.csv',
-        help='Path to CSV file (default: data/fixtures/monte_carlo/samples.csv)'
+        "--csv",
+        nargs="+",
+        required=True,
+        help="CSV file(s) or glob pattern(s)",
     )
-    
+    parser.add_argument(
+        "--output",
+        "-o",
+        default="/tmp/performance_table.tex",
+        help="Output LaTeX file path (default: /tmp/performance_table.tex)",
+    )
+
     args = parser.parse_args()
+
+    df = load_csvs(args.csv)
+    stats = aggregate_stats(df)
+    latex = to_latex_table(stats)
+
+    # Write to file
+    output_path = Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path.write_text(latex)
     
-    generator = LaTeXTableGenerator(csv_path=args.csv)
-    generator.run()
+    print(f"LaTeX table written to: {output_path}")
 
 
 if __name__ == "__main__":
