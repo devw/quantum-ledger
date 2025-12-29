@@ -63,9 +63,9 @@ python -m tools.reporting.generate_box_plot \
     --csv data/fixtures/monte_carlo/workshop/ECDSA_*.csv \
           data/fixtures/monte_carlo/workshop/DILITHIUM3_*.csv \
           data/fixtures/monte_carlo/workshop/HYBRID_*.csv \
-    --metric sig_gen_time \
-    --output /tmp/sig_gen_comparison.png \
-    --title "Signature Generation: ECDSA vs Dilithium3 vs Hybrid"
+    --metric latency_avg \
+    --output /tmp/latency_avg_comparison.png \
+    --title "Latency: ECDSA vs Dilithium3 vs Hybrid"
 ```
 
 **Supported metrics:** `latency_avg`, `latency_p95`, `tx_rate`, `cpu_util`, `mem_util`, `sig_gen_time`, `sig_verify_time`, `block_commit_time`, `block_size`
@@ -73,7 +73,9 @@ python -m tools.reporting.generate_box_plot \
 ### LaTeX Tables
 ```bash
 python -m tools.reporting.generate_latex_tables \
-    --csv data/raw/my_samples.csv
+    --csv data/fixtures/monte_carlo/workshop/*.csv \
+    -o /tmp/crypto-performance.tex
+
 ```
 
 ---
