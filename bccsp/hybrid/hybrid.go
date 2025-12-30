@@ -1,7 +1,6 @@
 package hybrid
 
 import (
-	"crypto/sha256"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -76,7 +75,7 @@ func (h *HybridBCCSP) KeyGen(opts bccsp.KeyGenOpts) (bccsp.Key, error) {
 		return nil, fmt.Errorf("Dilithium3 init failed: %w", err)
 	}
 
-	pqcPub, err := signer.GenerateKeypair()
+	pqcPub, err := signer.GenerateKeyPair()
 	if err != nil {
 		return nil, fmt.Errorf("Dilithium3 keygen failed: %w", err)
 	}
@@ -111,7 +110,7 @@ func (h *HybridBCCSP) Hash(msg []byte, opts bccsp.HashOpts) ([]byte, error) {
 }
 
 // GetHash returns a hash instance
-func (h *HybridBCCSP) GetHash(opts bccsp.HashOpts) (hash.Hash, error) {
+func (h *HybridBCCSP) GetHash(opts bccsp.HashOpts) (crypto.Hash, error) {
 	return h.sw.GetHash(opts)
 }
 
