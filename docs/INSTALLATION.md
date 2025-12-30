@@ -1,110 +1,163 @@
-Sì, ti suggerisco **`INSTALLATION.md`** nella root `docs/`.
+# Installation Guide
 
-# INSTALLATION.md
+## Prerequisites
 
-## Installation Guide
+| Component | Version | Purpose |
+|-----------|---------|---------|
+| Go | 1.22+ | Core runtime |
+| liboqs | 0.10.1+ | Post-quantum cryptography |
+| Docker | 20.10+ | Container orchestration |
+| CMake | 3.18+ | Build system |
+| pkg-config | - | Library configuration |
 
-### Prerequisites
+## Quick Start
 
-This project requires the following components:
-- Go 1.22+
-- liboqs (Open Quantum Safe library)
-- Docker & Docker Compose
-- CMake, Ninja, pkg-config
-
-### Platform-Specific Installation
-
-#### macOS (Apple Silicon M1/M2/M3/M4)
+### macOS (Apple Silicon)
 
 ```bash
-# Install dependencies via Homebrew
+# Install system dependencies
 brew install go@1.22 cmake ninja openssl@3 pkg-config liboqs
 
-# Configure environment
-cat >> ~/.zshrc << 'EOF'
-export PATH="/opt/homebrew/opt/go@1.22/bin:$PATH"
+# Configure environment (one-time)
+tee -a ~/.zshrc << 'EOF'
+export PATH="/opt/homebrew/opt/go@1.22/bin:$GOPATH/bin:$PATH"
 export GOPATH=$HOME/go
-export PATH=$PATH:$GOPATH/bin
 export CGO_ENABLED=1
 export CGO_CFLAGS="-I/opt/homebrew/include"
-export CGO_LDFLAGS="-L/opt/homebrew/lib"
+export CGO_LDFLAGS="-L/opt/homebrew/lib -loqs"
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+EOF
+
+# Create liboqs-go pkg-config wrapper
+sudo tee /opt/homebrew/lib/pkgconfig/liboqs-go.pc << 'EOF'
+prefix=/opt/homebrew
+libdir=${prefix}/lib
+includedir=${prefix}/include
+Name: liboqs-go
+Version: 0.15.0
+Requires: liboqs
+Cflags: -I${includedir}
+Libs: -L${libdir} -loqs
 EOF
 
 source ~/.zshrc
 ```
 
-#### Linux (Ubuntu/Debian)
+### Linux (Ubuntu/Debian)
 
 ```bash
 # Install Go
-wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+wget -qO- https://go.dev/dl/go1.22.0.linux-amd64.tar.gz | sudo tar -C /usr/local -xz
+echo 'export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin' >> ~/.bashrc
 
-# Install build dependencies
-sudo apt-get update
-sudo apt-get install -y build-essential cmake ninja-build libssl-dev pkg-config
+# Install build tools
+sudo apt-get update && sudo apt-get install -y \
+    build-essential cmake ninja-build libssl-dev pkg-config git
 
-# Install liboqs from source
-git clone --depth 1 --branch 0.10.1 https://github.com/open-quantum-safe/liboqs.git
-cd liboqs && mkdir build && cd build
-cmake -GNinja -DCMAKE_INSTALL_PREFIX=/usr/local -DBUILD_SHARED_LIBS=ON ..
-ninja && sudo ninja install && sudo ldconfig
+# Build and install liboqs
+git clone --depth 1 --branch 0.10.1 https://github.com/open-quantum-safe/liboqs.git /tmp/liboqs
+cmake -S /tmp/liboqs -B /tmp/liboqs/build -GNinja \
+    -DCMAKE_INSTALL_PREFIX=/usr/local \
+    -DBUILD_SHARED_LIBS=ON
+sudo cmake --build /tmp/liboqs/build --target install
+sudo ldconfig
+
+source ~/.bashrc
 ```
 
-### Project Setup
+## Project Setup
 
 ```bash
-# Clone repository
+# Clone and initialize
 git clone https://github.com/yourusername/quantum-ledger.git
 cd quantum-ledger
 
-# Initialize Go modules
-go mod init github.com/yourusername/quantum-ledger
-
 # Install Go dependencies
-CGO_ENABLED=1 go get github.com/open-quantum-safe/liboqs-go/oqs@latest
-go get github.com/hyperledger/fabric-protos-go-apiv2@latest
-go get github.com/hyperledger/fabric-lib-go@latest
-go mod tidy
+go mod download
+go mod verify
+
+# Build project
+go build ./bccsp/hybrid/
+go build ./...
 ```
 
-### Verification
+## Verification
 
 ```bash
-# Verify Go installation
-go version
+# System checks
+go version                    # Expected: go1.22+
+pkg-config --modversion liboqs # Expected: 0.10.1+
+docker --version              # Expected: 20.10+
 
-# Verify liboqs installation
-pkg-config --modversion liboqs
+# Build verification
+go build ./bccsp/hybrid/ && echo "✓ Hybrid BCCSP compiled"
+go test ./bccsp/hybrid/ -v   # Run unit tests
 
-# Test Dilithium3
-go run -C tools/scripts verify_pqc.go
+# Runtime verification
+go run -tags verify tools/scripts/verify_install.go
 ```
 
-### Troubleshooting
+## Troubleshooting
 
-**CGO errors on macOS:**
+### CGO Compilation Errors
+
 ```bash
-export CGO_ENABLED=1
-export CGO_LDFLAGS="-L/opt/homebrew/lib"
-export CGO_CFLAGS="-I/opt/homebrew/include"
+# macOS: Verify Homebrew paths
+ls -la /opt/homebrew/include/oqs/
+ls -la /opt/homebrew/lib/liboqs.dylib
+
+# Linux: Verify system paths
+ldconfig -p | grep liboqs
+pkg-config --cflags --libs liboqs
+
+# Force rebuild with verbose output
+CGO_ENABLED=1 go build -x ./bccsp/hybrid/
 ```
 
-**liboqs not found:**
+### Package Not Found
+
 ```bash
-# macOS
-export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"
+# Refresh pkg-config cache
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig:$PKG_CONFIG_PATH"  # macOS
+export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"    # Linux
 
-# Linux
-export PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
-sudo ldconfig
+# Verify liboqs-go.pc exists
+pkg-config --list-all | grep liboqs
 ```
 
-### Next Steps
+### Docker Issues
 
-After successful installation, proceed to:
-1. [FABRIC_SETUP.md](./FABRIC_SETUP.md) - Configure Hyperledger Fabric network
-2. [CRYPTOGRAPHIC_MODES.md](./CRYPTOGRAPHIC_MODES.md) - Understand hybrid cryptography
-3. [SCRIPTS_GUIDE.md](./SCRIPTS_GUIDE.md) - Run benchmarks
+```bash
+# Verify Docker daemon
+docker info
+
+# Check Docker Compose
+docker-compose version
+
+# Test container build
+docker build -f docker/compose/Dockerfile.peer -t test-peer .
+```
+
+## Environment Variables Reference
+
+| Variable | Value | Required For |
+|----------|-------|--------------|
+| `CGO_ENABLED` | `1` | All builds |
+| `CGO_CFLAGS` | `-I/path/to/include` | liboqs headers |
+| `CGO_LDFLAGS` | `-L/path/to/lib -loqs` | liboqs linking |
+| `PKG_CONFIG_PATH` | `/path/to/pkgconfig` | pkg-config resolution |
+| `GOPATH` | `$HOME/go` | Go workspace |
+
+## Next Steps
+
+| Documentation | Purpose |
+|---------------|---------|
+| [FABRIC_SETUP.md](./FABRIC_SETUP.md) | Deploy Hyperledger Fabric network |
+| [CRYPTOGRAPHIC_MODES.md](./CRYPTOGRAPHIC_MODES.md) | Understand hybrid cryptography |
+| [SCRIPTS_GUIDE.md](./SCRIPTS_GUIDE.md) | Run benchmarks and tests |
+
+## Support
+
+- **Issues**: Open GitHub issue with `[INSTALL]` prefix
+- **Logs**: Include output from `go build -x` and `pkg-config --debug`
+- **Environment**: Run `go env` and attach output
