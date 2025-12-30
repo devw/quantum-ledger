@@ -5,13 +5,14 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"os"
+
+t"os"
 	"github.com/hyperledger/fabric-lib-go/bccsp"
 	"github.com/hyperledger/fabric-lib-go/bccsp/sw"
 	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
-// HybridBCCSP implements BCCSP with hybrid ECDSA + ML-DSA-65 cryptography
+// HybridBCCSP implements BCCSP with hybrid ECDSA + Dilithium3 cryptography
 type HybridBCCSP struct {
 	sw bccsp.BCCSP // Software BCCSP for ECDSA operations
 }
@@ -60,7 +61,7 @@ func New() (bccsp.BCCSP, error) {
 	return &HybridBCCSP{sw: swBCCSP}, nil
 }
 
-// KeyGen generates a hybrid key pair (ECDSA + ML-DSA-65)
+// KeyGen generates a hybrid key pair (ECDSA + Dilithium3)
 func (h *HybridBCCSP) KeyGen(opts bccsp.KeyGenOpts) (bccsp.Key, error) {
 	// 1. Generate ECDSA key
 	ecdsaKey, err := h.sw.KeyGen(opts)
@@ -68,17 +69,17 @@ func (h *HybridBCCSP) KeyGen(opts bccsp.KeyGenOpts) (bccsp.Key, error) {
 		return nil, fmt.Errorf("ECDSA KeyGen failed: %w", err)
 	}
 
-	// 2. Generate ML-DSA-65 key pair
+	// 2. Generate Dilithium3 key pair
 	signer := oqs.Signature{}
 	defer signer.Clean()
 
-	if err := signer.Init("ML-DSA-65", nil); err != nil {
-		return nil, fmt.Errorf("ML-DSA-65 init failed: %w", err)
+	if err := signer.Init("Dilithium3", nil); err != nil {
+		return nil, fmt.Errorf("Dilithium3 init failed: %w", err)
 	}
 
 	pqcPub, err := signer.GenerateKeyPair()
 	if err != nil {
-		return nil, fmt.Errorf("ML-DSA-65 keygen failed: %w", err)
+		return nil, fmt.Errorf("Dilithium3 keygen failed: %w", err)
 	}
 
 	pqcPriv := signer.ExportSecretKey()
@@ -115,7 +116,7 @@ func (h *HybridBCCSP) GetHash(opts bccsp.HashOpts) (hash.Hash, error) {
 	return h.sw.GetHash(opts)
 }
 
-// Sign creates a hybrid signature (ECDSA + ML-DSA-65)
+// Sign creates a hybrid signature (ECDSA + Dilithium3)
 func (h *HybridBCCSP) Sign(k bccsp.Key, digest []byte, opts bccsp.SignerOpts) ([]byte, error) {
 	hk, ok := k.(*hybridKey)
 	if !ok {
@@ -129,17 +130,17 @@ func (h *HybridBCCSP) Sign(k bccsp.Key, digest []byte, opts bccsp.SignerOpts) ([
 		return nil, fmt.Errorf("ECDSA sign failed: %w", err)
 	}
 
-	// 2. Sign with ML-DSA-65
+	// 2. Sign with Dilithium3
 	signer := oqs.Signature{}
 	defer signer.Clean()
 
-	if err := signer.Init("ML-DSA-65", hk.pqcPriv); err != nil {
-		return nil, fmt.Errorf("ML-DSA-65 init failed: %w", err)
+	if err := signer.Init("Dilithium3", hk.pqcPriv); err != nil {
+		return nil, fmt.Errorf("Dilithium3 init failed: %w", err)
 	}
 
 	pqcSig, err := signer.Sign(digest)
 	if err != nil {
-		return nil, fmt.Errorf("ML-DSA-65 sign failed: %w", err)
+		return nil, fmt.Errorf("Dilithium3 sign failed: %w", err)
 	}
 
 	// 3. Combine signatures: [4 bytes ECDSA len][ECDSA sig][PQC sig]
@@ -166,17 +167,17 @@ func (h *HybridBCCSP) Verify(k bccsp.Key, signature, digest []byte, opts bccsp.S
 		return false, fmt.Errorf("ECDSA verify failed: %w", err)
 	}
 
-	// 3. Verify ML-DSA-65
+	// 3. Verify Dilithium3
 	signer := oqs.Signature{}
 	defer signer.Clean()
 
-	if err := signer.Init("ML-DSA-65", hk.pqcPub); err != nil {
-		return false, fmt.Errorf("ML-DSA-65 init failed: %w", err)
+	if err := signer.Init("Dilithium3", nil); err != nil {
+		return false, fmt.Errorf("Dilithium3 init failed: %w", err)
 	}
 
 	validPQC, err := signer.Verify(digest, pqcSig, hk.pqcPub)
 	if err != nil {
-		return false, fmt.Errorf("ML-DSA-65 verify failed: %w", err)
+		return false, fmt.Errorf("Dilithium3 verify failed: %w", err)
 	}
 
 	// Both must be valid
@@ -215,10 +216,6 @@ func parseHybridSignature(signature []byte) (ecdsaSig, pqcSig []byte, err error)
 	}
 
 	ecdsaLen := binary.BigEndian.Uint32(signature[:4])
-	if ecdsaLen > uint32(len(signature)-4) {
-		return nil, nil, errors.New("invalid signature format: ECDSA length exceeds signature size")
-	}
-	
 	if len(signature) < int(4+ecdsaLen) {
 		return nil, nil, errors.New("invalid signature format")
 	}

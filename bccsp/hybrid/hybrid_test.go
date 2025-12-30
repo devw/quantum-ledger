@@ -60,8 +60,10 @@ func TestSignVerify(t *testing.T) {
 	// Verify signature format: [4 bytes len][ECDSA sig][PQC sig]
 	assert.GreaterOrEqual(t, len(signature), 4, "Signature should have at least length prefix")
 
+	// Extract public key
+	pubKey, _ := key.PublicKey()
 	// Verify
-	valid, err := h.Verify(key, signature, digest[:], nil)
+	valid, err := h.Verify(pubKey, signature, digest[:], nil)
 	require.NoError(t, err, "Verify should not error")
 	assert.True(t, valid, "Signature should be valid")
 
