@@ -7,7 +7,7 @@ Sì, ti suggerisco **`INSTALLATION.md`** nella root `docs/`.
 ### Prerequisites
 
 This project requires the following components:
-- Go 1.21+
+- Go 1.22+
 - liboqs (Open Quantum Safe library)
 - Docker & Docker Compose
 - CMake, Ninja, pkg-config
@@ -18,11 +18,11 @@ This project requires the following components:
 
 ```bash
 # Install dependencies via Homebrew
-brew install go@1.21 cmake ninja openssl@3 pkg-config liboqs
+brew install go@1.22 cmake ninja openssl@3 pkg-config liboqs
 
 # Configure environment
 cat >> ~/.zshrc << 'EOF'
-export PATH="/opt/homebrew/opt/go@1.21/bin:$PATH"
+export PATH="/opt/homebrew/opt/go@1.22/bin:$PATH"
 export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 export CGO_ENABLED=1
@@ -38,8 +38,8 @@ source ~/.zshrc
 
 ```bash
 # Install Go
-wget https://go.dev/dl/go1.21.5.linux-amd64.tar.gz
-sudo tar -C /usr/local -xzf go1.21.5.linux-amd64.tar.gz
+wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
+sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
 
 # Install build dependencies
@@ -65,7 +65,8 @@ go mod init github.com/yourusername/quantum-ledger
 
 # Install Go dependencies
 CGO_ENABLED=1 go get github.com/open-quantum-safe/liboqs-go/oqs@latest
-go get github.com/hyperledger/fabric@v2.5.9
+go get github.com/hyperledger/fabric-protos-go-apiv2@latest
+go get github.com/hyperledger/fabric-lib-go@latest
 go mod tidy
 ```
 
@@ -107,4 +108,3 @@ After successful installation, proceed to:
 1. [FABRIC_SETUP.md](./FABRIC_SETUP.md) - Configure Hyperledger Fabric network
 2. [CRYPTOGRAPHIC_MODES.md](./CRYPTOGRAPHIC_MODES.md) - Understand hybrid cryptography
 3. [SCRIPTS_GUIDE.md](./SCRIPTS_GUIDE.md) - Run benchmarks
-```
