@@ -1,6 +1,7 @@
 package hybrid
 
 import (
+	"hash"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -110,7 +111,7 @@ func (h *HybridBCCSP) Hash(msg []byte, opts bccsp.HashOpts) ([]byte, error) {
 }
 
 // GetHash returns a hash instance
-func (h *HybridBCCSP) GetHash(opts bccsp.HashOpts) (crypto.Hash, error) {
+func (h *HybridBCCSP) GetHash(opts bccsp.HashOpts) (hash.Hash, error) {
 	return h.sw.GetHash(opts)
 }
 
