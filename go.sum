@@ -1,2 +1,6 @@
+github.com/hyperledger/fabric-lib-go v1.1.2 h1:3eHwudGZC5Ex7go5UAzVKhpF34gypPZGfSZksBKLWvE=
+github.com/hyperledger/fabric-lib-go v1.1.2/go.mod h1:SHNCq8AB0VpHAmvJEtdbzabv6NNV1F48JdmDihasBjc=
+github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7 h1:sQ5qv8vQQfwewa1JlCiSCC8dLElmaU2/frLolpgibEY=
+github.com/hyperledger/fabric-protos-go-apiv2 v0.3.7/go.mod h1:bJnwzfv03oZQeCc863pdGTDgf5nmCy6Za3RAE7d2XsQ=
 github.com/open-quantum-safe/liboqs-go v0.0.0-20250119172907-28b5301df438 h1:rqhyfDxqF50veu/A7HsgRBShVN8Gqz4mmrgtRr6KnLo=
 github.com/open-quantum-safe/liboqs-go v0.0.0-20250119172907-28b5301df438/go.mod h1:OoIQ+v4rM6S6cF9zLGxsnsXX9vwv7WLp9s0TV2FbD6M=
