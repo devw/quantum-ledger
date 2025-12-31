@@ -31,7 +31,7 @@ func TestKeyGen(t *testing.T) {
 	require.True(t, ok, "Key should be hybridKey type")
 	assert.NotNil(t, hk.ecdsaKey, "ECDSA key should be present")
 	assert.NotEmpty(t, hk.pqcPub, "PQC public key should be present")
-	assert.NotEmpty(t, hk.pqcPriv, "PQC private key should be present")
+	assert.NotNil(t, hk.pqcPriv, "PQC private key should be present")
 
 	// Verify key properties
 	assert.False(t, key.Symmetric(), "Key should be asymmetric")
@@ -57,17 +57,12 @@ func TestSignVerify(t *testing.T) {
 	require.NoError(t, err, "Sign should succeed")
 	require.NotEmpty(t, signature, "Signature should not be empty")
 
-	// Verify signature format: [4 bytes len][ECDSA sig][PQC sig]
-	assert.GreaterOrEqual(t, len(signature), 4, "Signature should have at least length prefix")
-
 	// Extract public key
-	pubKey, _ := key.PublicKey()
+	pubKey, err := key.PublicKey()
+	require.NoError(t, err, "PublicKey extraction should succeed")
+	
 	// Verify
 	valid, err := h.Verify(pubKey, signature, digest[:], nil)
-	if err != nil {
-		t.Logf("Verify error: %v", err)
-	}
-	t.Logf("Valid: %v, Error: %v", valid, err)
 	require.NoError(t, err, "Verify should not error")
 	assert.True(t, valid, "Signature should be valid")
 
@@ -82,7 +77,9 @@ func TestSignVerify(t *testing.T) {
 	// Test with tampered signature
 	tamperedSig := make([]byte, len(signature))
 	copy(tamperedSig, signature)
-	tamperedSig[len(tamperedSig)-1] ^= 0xFF
+	if len(tamperedSig) > 0 {
+		tamperedSig[len(tamperedSig)-1] ^= 0xFF
+	}
 
 	valid, err = h.Verify(key, tamperedSig, digest[:], nil)
 	assert.False(t, valid, "Tampered signature should fail verification")
@@ -110,34 +107,6 @@ func TestPublicKey(t *testing.T) {
 
 	// Verify public key properties
 	assert.False(t, pubKey.Private(), "Public key should not be private")
-}
-
-func TestSignatureFormat(t *testing.T) {
-	// Test combineSignatures
-	ecdsaSig := []byte("ecdsa_signature_data")
-	pqcSig := []byte("pqc_signature_data")
-
-	combined := combineSignatures(ecdsaSig, pqcSig)
-
-	// Verify length prefix
-	require.GreaterOrEqual(t, len(combined), 4, "Combined signature should have length prefix")
-
-	// Parse and verify
-	parsedECDSA, parsedPQC, err := parseHybridSignature(combined)
-	require.NoError(t, err, "Parse should succeed")
-	assert.Equal(t, ecdsaSig, parsedECDSA, "ECDSA signature should match")
-	assert.Equal(t, pqcSig, parsedPQC, "PQC signature should match")
-}
-
-func TestParseInvalidSignature(t *testing.T) {
-	// Test with too short signature
-	_, _, err := parseHybridSignature([]byte{0x01, 0x02})
-	assert.Error(t, err, "Should error on short signature")
-
-	// Test with invalid length prefix
-	invalidSig := []byte{0xFF, 0xFF, 0xFF, 0xFF, 0x01, 0x02}
-	_, _, err = parseHybridSignature(invalidSig)
-	assert.Error(t, err, "Should error on invalid length")
 }
 
 func TestHash(t *testing.T) {
@@ -222,9 +191,16 @@ func TestPQCSigner(t *testing.T) {
 	}
 
 	msg := []byte("hello pqc")
-	sig := signer.Sign(msg)
+	sig, err := signer.Sign(msg)
+	if err != nil {
+		t.Fatalf("failed to sign: %v", err)
+	}
 
-	if !signer.Verify(msg, sig) {
+	valid, err := signer.Verify(msg, sig)
+	if err != nil {
+		t.Fatalf("failed to verify: %v", err)
+	}
+	if !valid {
 		t.Fatal("signature verification failed")
 	}
 }

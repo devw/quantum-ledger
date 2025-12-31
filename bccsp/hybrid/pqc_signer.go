@@ -2,7 +2,6 @@ package hybrid
 
 import (
 	"fmt"
-
 	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
@@ -11,7 +10,8 @@ const PQCAlgorithm = "Dilithium2"
 
 // PQCSigner wrap del signer PQC
 type PQCSigner struct {
-	signer oqs.Signature
+	signer    oqs.Signature
+	publicKey []byte
 }
 
 // NewPQCSigner crea un signer con nuova coppia di chiavi
@@ -20,7 +20,17 @@ func NewPQCSigner() (*PQCSigner, error) {
 	if err := signer.Init(PQCAlgorithm, nil); err != nil {
 		return nil, fmt.Errorf("failed to init PQC signer: %w", err)
 	}
-	return &PQCSigner{signer: signer}, nil
+	
+	// Genera la coppia di chiavi
+	pubKey, err := signer.GenerateKeyPair()
+	if err != nil {
+		return nil, fmt.Errorf("failed to generate key pair: %w", err)
+	}
+	
+	return &PQCSigner{
+		signer:    signer,
+		publicKey: pubKey,
+	}, nil
 }
 
 // NewPQCSignerFromPrivate crea un signer da chiave privata esistente
@@ -29,7 +39,13 @@ func NewPQCSignerFromPrivate(privKey []byte) (*PQCSigner, error) {
 	if err := signer.Init(PQCAlgorithm, privKey); err != nil {
 		return nil, fmt.Errorf("failed to init PQC signer with private key: %w", err)
 	}
-	return &PQCSigner{signer: signer}, nil
+	
+	// Ricostruisci la chiave pubblica dalla privata (se possibile)
+	// Potrebbe servire passarla come parametro separato
+	return &PQCSigner{
+		signer:    signer,
+		publicKey: nil, // TODO: passare come parametro
+	}, nil
 }
 
 // Sign firma il messaggio
@@ -43,14 +59,10 @@ func (p *PQCSigner) Sign(msg []byte) ([]byte, error) {
 
 // Verify verifica la firma
 func (p *PQCSigner) Verify(msg, sig []byte) (bool, error) {
-	valid, err := p.signer.Verify(msg, sig)
-	if err != nil {
-		return false, fmt.Errorf("PQC verification failed: %w", err)
-	}
-	return valid, nil
+	return p.signer.Verify(msg, sig, p.publicKey)
 }
 
 // PublicKey restituisce la chiave pubblica
 func (p *PQCSigner) PublicKey() []byte {
-	return p.signer.ExportPublicKey()
+	return p.publicKey
 }
