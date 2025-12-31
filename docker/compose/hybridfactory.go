@@ -18,7 +18,7 @@ package factory
 
 import (
 	"github.com/hyperledger/fabric/bccsp"
-	"github.com/hyperledger/fabric/bccsp/hybrid"
+	"github.com/yourusername/quantum-ledger/bccsp/hybrid"
 	"github.com/hyperledger/fabric/bccsp/sw"
 	"github.com/pkg/errors"
 )

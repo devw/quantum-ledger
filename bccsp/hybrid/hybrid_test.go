@@ -64,6 +64,10 @@ func TestSignVerify(t *testing.T) {
 	pubKey, _ := key.PublicKey()
 	// Verify
 	valid, err := h.Verify(pubKey, signature, digest[:], nil)
+	if err != nil {
+		t.Logf("Verify error: %v", err)
+	}
+	t.Logf("Valid: %v, Error: %v", valid, err)
 	require.NoError(t, err, "Verify should not error")
 	assert.True(t, valid, "Signature should be valid")
 
@@ -208,5 +212,19 @@ func BenchmarkVerify(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, _ = h.Verify(key, signature, digest[:], nil)
+	}
+}
+
+func TestPQCSigner(t *testing.T) {
+	signer, err := NewPQCSigner()
+	if err != nil {
+		t.Fatalf("failed to create signer: %v", err)
+	}
+
+	msg := []byte("hello pqc")
+	sig := signer.Sign(msg)
+
+	if !signer.Verify(msg, sig) {
+		t.Fatal("signature verification failed")
 	}
 }
