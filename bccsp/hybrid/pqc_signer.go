@@ -6,8 +6,8 @@ import (
 	"github.com/open-quantum-safe/liboqs-go/oqs"
 )
 
-// PQCAlgorithm da usare
-const PQCAlgorithm = "Dilithium2"
+// PQCAlgorithm da usare - ML-DSA-65 è il nome standard NIST per Dilithium3
+const PQCAlgorithm = "ML-DSA-65"
 
 // PQCSigner wrap del signer PQC
 type PQCSigner struct {
@@ -25,6 +25,7 @@ func NewPQCSigner() (*PQCSigner, error) {
 	// Genera la coppia di chiavi
 	pubKey, err := signer.GenerateKeyPair()
 	if err != nil {
+		signer.Clean()
 		return nil, fmt.Errorf("failed to generate key pair: %w", err)
 	}
 	
@@ -66,4 +67,9 @@ func (p *PQCSigner) Verify(msg, sig []byte) (bool, error) {
 // PublicKey restituisce la chiave pubblica
 func (p *PQCSigner) PublicKey() []byte {
 	return p.publicKey
+}
+
+// Clean libera le risorse
+func (p *PQCSigner) Clean() {
+	p.signer.Clean()
 }
